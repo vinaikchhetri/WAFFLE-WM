@@ -31,6 +31,7 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 	if args.model == 'nn':
 		model_global = models.MP(28*28,200,10)
 		model_global.to(device)
+		model_local = models.MP(28*28,200,10)
 		criterion = torch.nn.CrossEntropyLoss()
 		
 	w_global = model_global.state_dict()
@@ -47,9 +48,9 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 		total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
 		store = {}
 		for index,client_idx in enumerate(client_indices): #loop through selected clients
-			model_local = models.MP(28*28,200,10)
-			model_local.to(device)
-			w_local = client_update(trainset, client_idx, w_global.copy(), args, client_data_dict, criterion , model_local) #client index, global weight, args, dictionary of clients' data, criterion, optimizer.
+			#model_local = models.MP(28*28,200,10)
+			#model_local.to(device)
+			w_local = client_update(trainset, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local) #client index, global weight, args, dictionary of clients' data, criterion, optimizer.
 			store[index] = w_local
 		# 	if index==0: #moving average does not exist when the first client is selected.
 		# 		moving_weights = w_local
@@ -104,7 +105,9 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 		print(f'server stats: [loss: {running_loss / (index+1):.3f}')
 		print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
 
-def client_update(trainset, client_idx, w_global, args, client_data_dict, criterion , model_local):
+def client_update(trainset, client_idx, w_global, args, client_data_dict, criterion, model_local):
+	model_local.load_state_dict(w_global)
+
 	data_client = client_data_dict[client_idx] #client i's data.
 	
 	cd = CustomDataset(trainset, data_client)
@@ -115,6 +118,7 @@ def client_update(trainset, client_idx, w_global, args, client_data_dict, criter
 	else:
 		device = torch.device('cpu')
 	
+	model_local.to(device)
 	optimizer = optim.SGD(model_local.parameters(), lr=0.01, momentum=0.5)
 
 	for epoch in range(args.E):
