@@ -11,7 +11,7 @@ def arg_parser():
     parser.add_argument("--E", type=int, help="local epochs.")
     parser.add_argument("--B", type=int, help="batch size.")
     parser.add_argument("--T", type=int, help="total no. of rounds.")
-    parser.add_argument("-lr", type=int, help="learning rate.")
+    parser.add_argument("--lr", type=float, help="learning rate.")
 
     parser.add_argument("--dataset", type=str, default = "mnist", help="dataset choice.")
     parser.add_argument("--iid", type=str, default = "true", help="data distribution.")

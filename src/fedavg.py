@@ -35,6 +35,7 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 		
 	w_global = model_global.state_dict()
 	num_samples_dict = {} #number of samples per user.
+
 	for i in range (args.K): #loop through clients
 		num_samples_dict[i] = len(client_data_dict[i]) 
 	best_test_acc = -1
@@ -48,23 +49,23 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 		for index,client_idx in enumerate(client_indices): #loop through selected clients
 			model_local = models.MP(28*28,200,10)
 			model_local.to(device)
-			w_local = client_update(trainset, client_idx, w_global, args, client_data_dict, criterion , model_local) #client index, global weight, args, dictionary of clients' data, criterion, optimizer.
-			#store[index] = w_local
-			if index==0: #moving average does not exist when the first client is selected.
-				moving_weights = w_local
-				for layer in w_local:
-					moving_weights[layer] = w_local[layer]*(num_samples_list[index]/total_num_samples)
-			else:
-				moving_weights = moving_average(moving_weights, w_local, num_samples_list[index], total_num_samples)
-				#temp = w_local * (num_samples_list[index]/total_num_samples)
-		w_global =  moving_weights
+			w_local = client_update(trainset, client_idx, w_global.copy(), args, client_data_dict, criterion , model_local) #client index, global weight, args, dictionary of clients' data, criterion, optimizer.
+			store[index] = w_local
+		# 	if index==0: #moving average does not exist when the first client is selected.
+		# 		moving_weights = w_local
+		# 		for layer in w_local:
+		# 			moving_weights[layer] = w_local[layer]*(num_samples_list[index]/total_num_samples)
+		# 	else:
+		# 		moving_weights = moving_average(moving_weights, w_local, num_samples_list[index], total_num_samples)
+		# 		#temp = w_local * (num_samples_list[index]/total_num_samples)
+		# w_global =  moving_weights
 
-		# w_global = {}
-		# for layer in store[0]:
-		# 	sum = 0
-		# 	for user_key in store:
-		# 		sum += store[user_key][layer]*num_samples_list[user_key]/total_num_samples
-		# 	w_global[layer] = sum
+		w_global = {}
+		for layer in store[0]:
+			sum = 0
+			for user_key in store:
+				sum += store[user_key][layer]*num_samples_list[user_key]/total_num_samples
+			w_global[layer] = sum
 
 		# #Performing evaluation on test data.
 		# layers = model_global.state_dict()
@@ -109,7 +110,11 @@ def client_update(trainset, client_idx, w_global, args, client_data_dict, criter
 	cd = CustomDataset(trainset, data_client)
 	data_loader = torch.utils.data.DataLoader(cd, batch_size=args.B,
                                                 shuffle=True)
-	device = torch.device(args.gpu)
+	if args.gpu == "gpu":
+		device = torch.device('cuda:0')
+	else:
+		device = torch.device('cpu')
+	
 	optimizer = optim.SGD(model_local.parameters(), lr=0.01, momentum=0.5)
 
 	for epoch in range(args.E):
@@ -146,20 +151,3 @@ def client_update(trainset, client_idx, w_global, args, client_data_dict, criter
 	return model_local.state_dict()
 
 
-# #dataset
-# mnist
-# iid
-# 100->600
-
-# non-iid
-# 0-9 -> 200 shards of 300 ->each of the 100 clients gets 2 shards.
-
-# cifar
-# iid
-# non-iid
-
-
-# sampling: iid()
-# 		  non-iid
-
-# fed -> utils

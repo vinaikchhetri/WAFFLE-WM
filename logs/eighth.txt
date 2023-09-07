@@ -1,0 +1,270 @@
+Round 0
+server stats: [loss: 1.986
+server stats: [accuracy: 58.131
+Round 1
+server stats: [loss: 1.842
+server stats: [accuracy: 72.203
+Round 2
+server stats: [loss: 1.981
+server stats: [accuracy: 62.749
+Round 3
+server stats: [loss: 1.912
+server stats: [accuracy: 65.794
+Round 4
+server stats: [loss: 1.801
+server stats: [accuracy: 60.649
+Round 5
+server stats: [loss: 1.825
+server stats: [accuracy: 60.340
+Round 6
+server stats: [loss: 1.902
+server stats: [accuracy: 62.629
+Round 7
+server stats: [loss: 1.880
+server stats: [accuracy: 59.793
+Round 8
+server stats: [loss: 1.931
+server stats: [accuracy: 69.317
+Round 9
+server stats: [loss: 1.864
+server stats: [accuracy: 77.647
+Round 10
+server stats: [loss: 1.946
+server stats: [accuracy: 64.660
+Round 11
+server stats: [loss: 1.864
+server stats: [accuracy: 67.745
+Round 12
+server stats: [loss: 1.840
+server stats: [accuracy: 60.072
+Round 13
+server stats: [loss: 1.863
+server stats: [accuracy: 65.078
+Round 14
+server stats: [loss: 1.796
+server stats: [accuracy: 64.729
+Round 15
+server stats: [loss: 2.046
+server stats: [accuracy: 67.178
+Round 16
+server stats: [loss: 1.845
+server stats: [accuracy: 58.171
+Round 17
+server stats: [loss: 1.920
+server stats: [accuracy: 60.281
+Round 18
+server stats: [loss: 1.884
+server stats: [accuracy: 62.639
+Round 19
+server stats: [loss: 1.917
+server stats: [accuracy: 45.113
+Round 20
+server stats: [loss: 1.900
+server stats: [accuracy: 53.314
+Round 21
+server stats: [loss: 1.922
+server stats: [accuracy: 72.383
+Round 22
+server stats: [loss: 1.809
+server stats: [accuracy: 64.998
+Round 23
+server stats: [loss: 1.838
+server stats: [accuracy: 74.542
+Round 24
+server stats: [loss: 1.980
+server stats: [accuracy: 52.737
+Round 25
+server stats: [loss: 1.818
+server stats: [accuracy: 69.596
+Round 26
+server stats: [loss: 1.870
+server stats: [accuracy: 59.007
+Round 27
+server stats: [loss: 1.839
+server stats: [accuracy: 63.316
+Round 28
+server stats: [loss: 1.888
+server stats: [accuracy: 65.854
+Round 29
+server stats: [loss: 1.787
+server stats: [accuracy: 72.661
+Round 30
+server stats: [loss: 1.851
+server stats: [accuracy: 67.755
+Round 31
+server stats: [loss: 1.945
+server stats: [accuracy: 48.467
+Round 32
+server stats: [loss: 1.875
+server stats: [accuracy: 64.540
+Round 33
+server stats: [loss: 1.918
+server stats: [accuracy: 61.982
+Round 34
+server stats: [loss: 1.922
+server stats: [accuracy: 72.701
+Round 35
+server stats: [loss: 1.792
+server stats: [accuracy: 60.062
+Round 36
+server stats: [loss: 1.853
+server stats: [accuracy: 66.063
+Round 37
+server stats: [loss: 1.899
+server stats: [accuracy: 46.437
+Round 38
+server stats: [loss: 1.772
+server stats: [accuracy: 65.695
+Round 39
+server stats: [loss: 1.916
+server stats: [accuracy: 59.823
+Round 40
+server stats: [loss: 1.858
+server stats: [accuracy: 58.121
+Round 41
+server stats: [loss: 1.834
+server stats: [accuracy: 58.121
+Round 42
+server stats: [loss: 1.811
+server stats: [accuracy: 56.937
+Round 43
+server stats: [loss: 1.860
+server stats: [accuracy: 55.822
+Round 44
+server stats: [loss: 1.872
+server stats: [accuracy: 58.340
+Round 45
+server stats: [loss: 1.851
+server stats: [accuracy: 69.138
+Round 46
+server stats: [loss: 1.843
+server stats: [accuracy: 66.242
+Round 47
+server stats: [loss: 1.811
+server stats: [accuracy: 55.404
+Round 48
+server stats: [loss: 1.782
+server stats: [accuracy: 74.811
+Round 49
+server stats: [loss: 1.891
+server stats: [accuracy: 61.246
+Round 50
+server stats: [loss: 1.776
+server stats: [accuracy: 75.070
+Round 51
+server stats: [loss: 1.908
+server stats: [accuracy: 62.201
+Round 52
+server stats: [loss: 1.848
+server stats: [accuracy: 63.057
+Round 53
+server stats: [loss: 1.835
+server stats: [accuracy: 66.869
+Round 54
+server stats: [loss: 2.052
+server stats: [accuracy: 43.123
+Round 55
+server stats: [loss: 1.773
+server stats: [accuracy: 74.552
+Round 56
+server stats: [loss: 1.861
+server stats: [accuracy: 55.285
+Round 57
+server stats: [loss: 1.934
+server stats: [accuracy: 54.200
+Round 58
+server stats: [loss: 1.821
+server stats: [accuracy: 73.766
+Round 59
+server stats: [loss: 1.808
+server stats: [accuracy: 52.199
+Round 60
+server stats: [loss: 1.948
+server stats: [accuracy: 54.200
+Round 61
+server stats: [loss: 1.843
+server stats: [accuracy: 77.767
+Round 62
+server stats: [loss: 1.840
+server stats: [accuracy: 64.291
+Round 63
+server stats: [loss: 1.930
+server stats: [accuracy: 72.273
+Round 64
+server stats: [loss: 1.840
+server stats: [accuracy: 54.240
+Round 65
+server stats: [loss: 1.896
+server stats: [accuracy: 71.935
+Round 66
+server stats: [loss: 1.933
+server stats: [accuracy: 59.076
+Round 67
+server stats: [loss: 1.855
+server stats: [accuracy: 73.935
+Round 68
+server stats: [loss: 1.918
+server stats: [accuracy: 46.148
+Round 69
+server stats: [loss: 1.883
+server stats: [accuracy: 73.059
+Round 70
+server stats: [loss: 1.952
+server stats: [accuracy: 67.785
+Round 71
+server stats: [loss: 1.880
+server stats: [accuracy: 74.383
+Round 72
+server stats: [loss: 1.965
+server stats: [accuracy: 47.363
+Round 73
+server stats: [loss: 1.917
+server stats: [accuracy: 67.874
+Round 74
+server stats: [loss: 1.892
+server stats: [accuracy: 66.332
+Round 75
+server stats: [loss: 1.893
+server stats: [accuracy: 73.597
+Round 76
+server stats: [loss: 1.832
+server stats: [accuracy: 68.004
+Round 77
+server stats: [loss: 1.973
+server stats: [accuracy: 55.812
+Round 78
+server stats: [loss: 1.901
+server stats: [accuracy: 44.039
+Round 79
+server stats: [loss: 1.789
+server stats: [accuracy: 64.451
+Round 80
+server stats: [loss: 1.782
+server stats: [accuracy: 51.553
+Round 81
+server stats: [loss: 1.842
+server stats: [accuracy: 58.280
+Round 82
+server stats: [loss: 1.925
+server stats: [accuracy: 51.493
+Round 83
+server stats: [loss: 1.935
+server stats: [accuracy: 69.218
+Round 84
+server stats: [loss: 1.801
+server stats: [accuracy: 63.018
+Round 85
+server stats: [loss: 1.852
+server stats: [accuracy: 60.639
+Round 86
+server stats: [loss: 1.899
+server stats: [accuracy: 50.478
+Round 87
+server stats: [loss: 1.887
+server stats: [accuracy: 54.080
+Round 88
+server stats: [loss: 1.864
+server stats: [accuracy: 77.458
+Round 89
+server stats: [loss: 1.968
+server stats: [accuracy: 53.991
