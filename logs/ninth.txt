@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "/home/exouser/Implementation/FedAvg/src/main.py", line 42, in <module>
-    fed_avg(args, client_data_dict, trainset, testset)
-  File "/home/exouser/Implementation/FedAvg/src/fedavg.py", line 67, in fed_avg
-    sum += store[user_key][layer]*num_samples_list[user_key]/total_num_samples
-IndexError: list index out of range
