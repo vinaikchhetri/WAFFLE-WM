@@ -33,6 +33,12 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 		model_global.to(device)
 		model_local = models.MP(28*28,200,10)
 		criterion = torch.nn.CrossEntropyLoss()
+	
+	if args.model == 'cnn':
+		model_global = models.CNN_MNIST()
+		model_global.to(device)
+		model_local = models.CNN_MNIST()
+		criterion = torch.nn.CrossEntropyLoss()
 		
 	w_global = model_global.state_dict()
 	num_samples_dict = {} #number of samples per user.
@@ -52,6 +58,7 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 			#model_local.to(device)
 			w_local = client_update(trainset, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local) #client index, global weight, args, dictionary of clients' data, criterion, optimizer.
 			store[index] = w_local
+		##Moving Average
 		# 	if index==0: #moving average does not exist when the first client is selected.
 		# 		moving_weights = w_local
 		# 		for layer in w_local:
@@ -68,17 +75,8 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 				sum += store[user_key][layer]*num_samples_list[user_key]/total_num_samples
 			w_global[layer] = sum
 
-		# #Performing evaluation on test data.
-		# layers = model_global.state_dict()
-		# for layer in layers:
-		# 	print(getattr(layer))
-		# 	print(model_global.layer.weight)
-		# 	layers[layer] = w_global[layer]
-		# 	print(model_global.layer.weight)
+		#Performing evaluation on test data.
 		model_global.load_state_dict(w_global)
-			
-	
-
 		test_loader = torch.utils.data.DataLoader(testset, batch_size=64,
 											shuffle=False)
 		with torch.no_grad():
@@ -88,7 +86,8 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 			for index,data in enumerate(test_loader):  
 				inputs, labels = data
 				inputs = inputs.to(device)
-				inputs = inputs.flatten(1)
+				if args.model == 'nn':
+					inputs = inputs.flatten(1)
 				labels = labels.to(device)
 				output = model_global(inputs)
 				loss = criterion(output, labels)
@@ -133,8 +132,8 @@ def client_update(trainset, client_idx, w_global, args, client_data_dict, criter
 
 		
 			optimizer.zero_grad()
-
-			inputs = inputs.flatten(1)
+			if args.model == 'nn':
+				inputs = inputs.flatten(1)
 			outputs = model_local(inputs)
 			pred = torch.argmax(outputs, dim=1)
 			loss = criterion(outputs, labels)
