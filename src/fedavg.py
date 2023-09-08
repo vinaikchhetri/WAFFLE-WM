@@ -46,8 +46,13 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 	for i in range (args.K): #loop through clients
 		num_samples_dict[i] = len(client_data_dict[i]) 
 	best_test_acc = -1
+	test_acc = []
 	for rounds in range(args.T): #total number of rounds
-		m = int(max(args.C*args.K, 1)) 
+		if args.C == 0:
+			m = 1 
+		else:
+			m = int(max(args.C*args.K, 1)) 
+		
 		client_indices = np.random.choice(args.K, m, replace=False)
 		#client_indices.astype(int)
 		num_samples_list = [num_samples_dict[idx] for idx in client_indices] #list containing number of samples for each user id.
@@ -103,6 +108,8 @@ def fed_avg(args, client_data_dict, trainset, testset): #args, dictionary of cli
 		print('Round '+ str(rounds))
 		print(f'server stats: [loss: {running_loss / (index+1):.3f}')
 		print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
+		test_acc.append(running_acc / (index+1))
+	torch.save(test_acc,'../stats/'+args.name)
 
 def client_update(trainset, client_idx, w_global, args, client_data_dict, criterion, model_local):
 	model_local.load_state_dict(w_global)
@@ -110,7 +117,11 @@ def client_update(trainset, client_idx, w_global, args, client_data_dict, criter
 	data_client = client_data_dict[client_idx] #client i's data.
 	
 	cd = CustomDataset(trainset, data_client)
-	data_loader = torch.utils.data.DataLoader(cd, batch_size=args.B,
+	if args.B == 8:
+		bs = len(trainset)
+	else:
+		bs = args.B
+	data_loader = torch.utils.data.DataLoader(cd, batch_size=bs,
                                                 shuffle=True)
 	if args.gpu == "gpu":
 		device = torch.device('cuda:0')
