@@ -13,8 +13,11 @@ from torch.utils.data import Dataset
 import utils
 import models
 from threading import Thread
+import time
 
-store = {}
+import concurrent.futures
+
+#store = {}
 
 class CustomDataset(Dataset):
 	def __init__(self, dataset, idxs):
@@ -77,7 +80,8 @@ def client_update(trainset, order_idx, client_idx, w_global, args, client_data_d
             running_loss = 0.0
             running_acc = 0.0
    # print('Finished Training Device '+ str(client_idx))
-   store[order_idx] = model_local.state_dict()
+   #store[order_idx] = model_local.state_dict()
+   return model_local.state_dict()
 
 
 if __name__=='__main__':
@@ -123,13 +127,6 @@ if __name__=='__main__':
                client_data_dict[client_idx] = merged_shards[0]
                available_indices = np.setdiff1d(available_indices, selected_indices)
 
-            # Test if non-iid data is ok.
-            # for index in range(10):
-            #    print(labels[client_data_dict[index]])
-          
-            #fed_avg(args, client_data_dict, trainset, testset)
-         #fed_avg(args, client_data_dict, trainset, testset)
-
          if args.gpu == "gpu":
                device = torch.device('cuda:0')
          else:
@@ -152,9 +149,12 @@ if __name__=='__main__':
 
          for i in range (args.K): #loop through clients
             num_samples_dict[i] = len(client_data_dict[i]) 
+
          best_test_acc = -1
          test_acc = []
+         
          for rounds in range(args.T): #total number of rounds
+            initial = time.time()
             if args.C == 0:
                m = 1 
             else:
@@ -166,30 +166,29 @@ if __name__=='__main__':
             total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
             store = {}
 
-            ##
-            # Start all threads. 
-            threads = []
-            for i in range(len(client_indices)):
-               if args.model == 'nn':
-                  model_local = models.MP(28*28,200,10)
-               if args.model == 'cnn':
-                  model_local = models.CNN_MNIST()
-
-               t = Thread(target=client_update, args=(trainset, i, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local,))
-               t.start()
-               threads.append(t)
-
-            # Wait all threads to finish.
-            for t in threads:
-               t.join()
-                           
-
+            with concurrent.futures.ThreadPoolExecutor(max_workers=len(client_indices)) as executor:
+               results = []
+               # Submit tasks to the executor
+               for index,client_idx in enumerate(client_indices): #loop through selected clients
+                  if args.model == 'nn':
+                     model_local = models.MP(28*28,200,10)
+                  if args.model == 'cnn':
+                     model_local = models.CNN_MNIST()
+                  pars = (trainset, i, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local)
+                  result = executor.submit(lambda p: client_update(*p), pars)
+                  results.append(result)
+               # Retrieve results as they become available
+               for ind,future in enumerate(concurrent.futures.as_completed(results)):
+                  result = future.result()
+                  store[ind] = result         
+            print("finished ", time.time() - initial)
             w_global = {}
             for layer in store[0]:
                sum = 0
                for user_key in store:
                   sum += store[user_key][layer]*num_samples_list[user_key]/total_num_samples
                w_global[layer] = sum
+            
 
             #Performing evaluation on test data.
             model_global.load_state_dict(w_global)
@@ -220,7 +219,8 @@ if __name__=='__main__':
             print(f'server stats: [loss: {running_loss / (index+1):.3f}')
             print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
             test_acc.append(running_acc / (index+1))
-         # # torch.save(test_acc,'../stats/'+args.name)
+         # torch.save(test_acc,'../stats/'+args.name)
+         #print("finished ", time.time() - initial)
 
 
 
