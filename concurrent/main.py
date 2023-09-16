@@ -106,97 +106,6 @@ if __name__=='__main__':
                client_data_dict[client_idx] = selected_indices
                available_indices = np.setdiff1d(available_indices, selected_indices)
             # fed_avg(args, client_data_dict, trainset, testset)
-            if args.gpu == "gpu":
-               device = torch.device('cuda:0')
-            else:
-               device = torch.device('cpu')
-            
-            if args.model == 'nn':
-               model_global = models.MP(28*28,200,10)
-               model_global.to(device)
-               model_local = models.MP(28*28,200,10)
-               criterion = torch.nn.CrossEntropyLoss()
-            
-            if args.model == 'cnn':
-               model_global = models.CNN_MNIST()
-               model_global.to(device)
-               model_local = models.CNN_MNIST()
-               criterion = torch.nn.CrossEntropyLoss()
-               
-            w_global = model_global.state_dict()
-            num_samples_dict = {} #number of samples per user.
-
-            for i in range (args.K): #loop through clients
-               num_samples_dict[i] = len(client_data_dict[i]) 
-            best_test_acc = -1
-            test_acc = []
-            for rounds in range(args.T): #total number of rounds
-               if args.C == 0:
-                  m = 1 
-               else:
-                  m = int(max(args.C*args.K, 1)) 
-               
-               client_indices = np.random.choice(args.K, m, replace=False)
-               #client_indices.astype(int)
-               num_samples_list = [num_samples_dict[idx] for idx in client_indices] #list containing number of samples for each user id.
-               total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
-               store = {}
-
-               ##
-               # Start all threads. 
-               threads = []
-               for i in range(len(client_indices)):
-                  model_local = models.MP(28*28,200,10)
-                  t = Thread(target=client_update, args=(trainset, i, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local,))
-                  t.start()
-                  threads.append(t)
-
-               # Wait all threads to finish.
-               for t in threads:
-                  t.join()
-                              
-               # for index,client_idx in enumerate(client_indices): #loop through selected clients
-               #    w_local = client_update(trainset, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local) #client index, global weight, args, dictionary of clients' data, criterion, optimizer.
-               #    store[index] = w_local
-
-               w_global = {}
-               for layer in store[0]:
-                  sum = 0
-                  for user_key in store:
-                     sum += store[user_key][layer]*num_samples_list[user_key]/total_num_samples
-                  w_global[layer] = sum
-
-               #Performing evaluation on test data.
-               model_global.load_state_dict(w_global)
-               test_loader = torch.utils.data.DataLoader(testset, batch_size=64,
-                                          shuffle=False)
-               with torch.no_grad():
-                  model_global.eval()
-                  running_loss = 0.0
-                  running_acc = 0.0
-                  for index,data in enumerate(test_loader):  
-                     inputs, labels = data
-                     inputs = inputs.to(device)
-                     if args.model == 'nn':
-                        inputs = inputs.flatten(1)
-                     labels = labels.to(device)
-                     output = model_global(inputs)
-                     loss = criterion(output, labels)
-                     pred = torch.argmax(output, dim=1)
-                     acc = utils.accuracy(pred, labels)
-                     running_acc += acc
-                     running_loss += loss
-               avg_acc = running_acc / (index+1)
-               if best_test_acc<avg_acc:
-                  best_test_acc = avg_acc
-                  best_dict = {rounds: best_test_acc}
-                  #torch.save(best_dict,'nn-trial.pt')
-               print('Round '+ str(rounds))
-               print(f'server stats: [loss: {running_loss / (index+1):.3f}')
-               print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
-               test_acc.append(running_acc / (index+1))
-            # # torch.save(test_acc,'../stats/'+args.name)
-
          else:
             #construct a non-iid mnist dataset.
             #distribute data among clients
@@ -220,6 +129,99 @@ if __name__=='__main__':
           
             #fed_avg(args, client_data_dict, trainset, testset)
          #fed_avg(args, client_data_dict, trainset, testset)
+
+         if args.gpu == "gpu":
+               device = torch.device('cuda:0')
+         else:
+            device = torch.device('cpu')
+         
+         if args.model == 'nn':
+            model_global = models.MP(28*28,200,10)
+            model_global.to(device)
+            #model_local = models.MP(28*28,200,10)
+            criterion = torch.nn.CrossEntropyLoss()
+         
+         if args.model == 'cnn':
+            model_global = models.CNN_MNIST()
+            model_global.to(device)
+            #model_local = models.CNN_MNIST()
+            criterion = torch.nn.CrossEntropyLoss()
+            
+         w_global = model_global.state_dict()
+         num_samples_dict = {} #number of samples per user.
+
+         for i in range (args.K): #loop through clients
+            num_samples_dict[i] = len(client_data_dict[i]) 
+         best_test_acc = -1
+         test_acc = []
+         for rounds in range(args.T): #total number of rounds
+            if args.C == 0:
+               m = 1 
+            else:
+               m = int(max(args.C*args.K, 1)) 
+            
+            client_indices = np.random.choice(args.K, m, replace=False)
+            #client_indices.astype(int)
+            num_samples_list = [num_samples_dict[idx] for idx in client_indices] #list containing number of samples for each user id.
+            total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
+            store = {}
+
+            ##
+            # Start all threads. 
+            threads = []
+            for i in range(len(client_indices)):
+               if args.model == 'nn':
+                  model_local = models.MP(28*28,200,10)
+               if args.model == 'cnn':
+                  model_local = models.CNN_MNIST()
+
+               t = Thread(target=client_update, args=(trainset, i, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local,))
+               t.start()
+               threads.append(t)
+
+            # Wait all threads to finish.
+            for t in threads:
+               t.join()
+                           
+
+            w_global = {}
+            for layer in store[0]:
+               sum = 0
+               for user_key in store:
+                  sum += store[user_key][layer]*num_samples_list[user_key]/total_num_samples
+               w_global[layer] = sum
+
+            #Performing evaluation on test data.
+            model_global.load_state_dict(w_global)
+            test_loader = torch.utils.data.DataLoader(testset, batch_size=64,
+                                       shuffle=False)
+            with torch.no_grad():
+               model_global.eval()
+               running_loss = 0.0
+               running_acc = 0.0
+               for index,data in enumerate(test_loader):  
+                  inputs, labels = data
+                  inputs = inputs.to(device)
+                  if args.model == 'nn':
+                     inputs = inputs.flatten(1)
+                  labels = labels.to(device)
+                  output = model_global(inputs)
+                  loss = criterion(output, labels)
+                  pred = torch.argmax(output, dim=1)
+                  acc = utils.accuracy(pred, labels)
+                  running_acc += acc
+                  running_loss += loss
+            avg_acc = running_acc / (index+1)
+            if best_test_acc<avg_acc:
+               best_test_acc = avg_acc
+               best_dict = {rounds: best_test_acc}
+               #torch.save(best_dict,'nn-trial.pt')
+            print('Round '+ str(rounds))
+            print(f'server stats: [loss: {running_loss / (index+1):.3f}')
+            print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
+            test_acc.append(running_acc / (index+1))
+         # # torch.save(test_acc,'../stats/'+args.name)
+
 
 
 

@@ -62,3 +62,7 @@ python main.py --algo="FedAvg" --K=100 --C=0.1 --E=5 --B=10 --T=500 --lr=0.01 --
 python main.py --algo="FedAvg" --K=100 --C=0.2 --E=5 --B=10 --T=500 --lr=0.01 --gpu="gpu" --model="cnn" --iid="false" --name="exp_cnn_10_0.2_f" > ../logs/exp_cnn_10_0.2_f.txt
 python main.py --algo="FedAvg" --K=100 --C=0.5 --E=5 --B=10 --T=500 --lr=0.01 --gpu="gpu" --model="cnn" --iid="false" --name="exp_cnn_10_0.5_f" > ../logs/exp_cnn_10_0.5_f.txt
 python main.py --algo="FedAvg" --K=100 --C=1 --E=5 --B=10 --T=500 --lr=0.01 --gpu="gpu" --model="cnn" --iid="false" --name="exp_cnn_10_1_f" > ../logs/exp_cnn_10_1_f.txt
+
+
+
+
