@@ -16,6 +16,8 @@ from threading import Thread
 import time
 
 import concurrent.futures
+import os
+print(os.cpu_count())
 
 #store = {}
 
@@ -41,7 +43,7 @@ def client_update(trainset, order_idx, client_idx, w_global, args, client_data_d
    else:
       bs = args.B
    data_loader = torch.utils.data.DataLoader(cd, batch_size=bs,
-                                                shuffle=True)
+                                                shuffle=True, pin_memory=True)
    if args.gpu == "gpu":
       device = torch.device('cuda:0')
    else:
@@ -49,11 +51,12 @@ def client_update(trainset, order_idx, client_idx, w_global, args, client_data_d
 	
    model_local.to(device)
    optimizer = optim.SGD(model_local.parameters(), lr=0.01, momentum=0.5)
-
+   #print("here", device)
    for epoch in range(args.E):
       running_loss = 0.0
       running_acc = 0.0
-      for index,data in enumerate(data_loader):        
+      for index,data in enumerate(data_loader):
+         
          inputs, labels = data
          #print("inputs ", inputs.shape)
          #print("labels ", labels)
@@ -67,7 +70,9 @@ def client_update(trainset, order_idx, client_idx, w_global, args, client_data_d
          outputs = model_local(inputs)
          pred = torch.argmax(outputs, dim=1)
          loss = criterion(outputs, labels)
+         initial = time.time()
          loss.backward()
+         #print(client_idx, time.time()-initial)
          optimizer.step()
 
          # print statistics
@@ -81,6 +86,7 @@ def client_update(trainset, order_idx, client_idx, w_global, args, client_data_d
             running_acc = 0.0
    # print('Finished Training Device '+ str(client_idx))
    #store[order_idx] = model_local.state_dict()
+   #print(order_idx) 
    return model_local.state_dict()
 
 
@@ -152,9 +158,10 @@ if __name__=='__main__':
 
          best_test_acc = -1
          test_acc = []
-         
+         ini = time.time()
+       
          for rounds in range(args.T): #total number of rounds
-            initial = time.time()
+            #initial = time.time()
             if args.C == 0:
                m = 1 
             else:
@@ -166,7 +173,7 @@ if __name__=='__main__':
             total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
             store = {}
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=len(client_indices)) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count() - 1) as executor:
                results = []
                # Submit tasks to the executor
                for index,client_idx in enumerate(client_indices): #loop through selected clients
@@ -174,14 +181,16 @@ if __name__=='__main__':
                      model_local = models.MP(28*28,200,10)
                   if args.model == 'cnn':
                      model_local = models.CNN_MNIST()
-                  pars = (trainset, i, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local)
+                  pars = (trainset, index, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local)
+                  # initial = time.time()
                   result = executor.submit(lambda p: client_update(*p), pars)
+                  #print(index," - ",time.time()-initial)
                   results.append(result)
                # Retrieve results as they become available
                for ind,future in enumerate(concurrent.futures.as_completed(results)):
                   result = future.result()
                   store[ind] = result         
-            print("finished ", time.time() - initial)
+            #print("finished ", time.time() - initial)
             w_global = {}
             for layer in store[0]:
                sum = 0
@@ -215,12 +224,12 @@ if __name__=='__main__':
                best_test_acc = avg_acc
                best_dict = {rounds: best_test_acc}
                #torch.save(best_dict,'nn-trial.pt')
-            print('Round '+ str(rounds))
-            print(f'server stats: [loss: {running_loss / (index+1):.3f}')
-            print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
-            test_acc.append(running_acc / (index+1))
+            #print('Round '+ str(rounds))
+            #print(f'server stats: [loss: {running_loss / (index+1):.3f}')
+            #print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
+            #test_acc.append(running_acc / (index+1))
          # torch.save(test_acc,'../stats/'+args.name)
-         #print("finished ", time.time() - initial)
+         print("finished ", time.time() - ini)
 
 
 
