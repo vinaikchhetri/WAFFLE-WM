@@ -12,11 +12,11 @@ from functools import reduce
 from torch.utils.data import Dataset
 import utils
 import models
-from threading import Thread
 import time
 
 import concurrent.futures
 import os
+import client
 print(os.cpu_count())
 
 #store = {}
@@ -34,64 +34,35 @@ class CustomDataset(Dataset):
 		#return torch.tensor(img), torch.tensor(label)
 		return img, label
 
-def client_update(trainset, order_idx, client_idx, w_global, args, client_data_dict, criterion, model_local):
-   model_local.load_state_dict(w_global)
-   data_client = client_data_dict[client_idx] #client i's data.
-   cd = CustomDataset(trainset, data_client)
-   if args.B == 8:
-      bs = len(trainset)
-   else:
-      bs = args.B
-   data_loader = torch.utils.data.DataLoader(cd, batch_size=bs,
-                                                shuffle=True, pin_memory=True)
-   if args.gpu == "gpu":
-      device = torch.device('cuda:0')
-   else:
-      device = torch.device('cpu')
-	
-   model_local.to(device)
-   optimizer = optim.SGD(model_local.parameters(), lr=0.01, momentum=0.5)
-   #print("here", device)
-   for epoch in range(args.E):
+def client_update(client):
+   for epoch in range(client.args.E):
       running_loss = 0.0
       running_acc = 0.0
-      for index,data in enumerate(data_loader):
+      for index,data in enumerate(client.data_loader):
          
          inputs, labels = data
          #print("inputs ", inputs.shape)
          #print("labels ", labels)
-         inputs = inputs.to(device)
-         labels = labels.to(device)
+         inputs = inputs.to(client.device)
+         labels = labels.to(client.device)
 
-      
-         optimizer.zero_grad()
+         client.optimizer.zero_grad()
          if args.model == 'nn':
             inputs = inputs.flatten(1)
-         outputs = model_local(inputs)
+         outputs = client.model_local(inputs)
          pred = torch.argmax(outputs, dim=1)
-         loss = criterion(outputs, labels)
-         initial = time.time()
+         loss = client.criterion(outputs, labels)
+         #initial = time.time()
          loss.backward()
          #print(client_idx, time.time()-initial)
-         optimizer.step()
+         client.optimizer.step()
 
-         # print statistics
-         acc = utils.accuracy(pred, labels)
-         running_acc += acc
-         running_loss += loss.item()
-         if index % 100 == 99:    # print every 2000 mini-batches
-            #print(f'device: {client_idx} [{epoch + 1}, {index + 1:5d}] loss: {running_loss / 100:.3f}')
-            #print(f'device: {client_idx} [{epoch + 1}, {index + 1:5d}] accuracy: {running_acc / 100:.3f}')
-            running_loss = 0.0
-            running_acc = 0.0
-   # print('Finished Training Device '+ str(client_idx))
-   #store[order_idx] = model_local.state_dict()
-   #print(order_idx) 
-   return model_local.state_dict()
+   return client.model_local.state_dict()
 
 
 if __name__=='__main__':
    args = arg_parser()
+   clients = []
    if args.algo == "FedAvg":
       if args.dataset == "mnist":
          dataset_name = 'mnist'
@@ -155,13 +126,17 @@ if __name__=='__main__':
 
          for i in range (args.K): #loop through clients
             num_samples_dict[i] = len(client_data_dict[i]) 
+            clients.append(client.Client(client_data_dict[i], trainset, args, device))
 
          best_test_acc = -1
          test_acc = []
-         ini = time.time()
-       
+         #ini = time.time()
+
+
+         initial = time.time()
          for rounds in range(args.T): #total number of rounds
-            #initial = time.time()
+            
+            
             if args.C == 0:
                m = 1 
             else:
@@ -173,17 +148,14 @@ if __name__=='__main__':
             total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
             store = {}
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count() - 1) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                results = []
                # Submit tasks to the executor
                for index,client_idx in enumerate(client_indices): #loop through selected clients
-                  if args.model == 'nn':
-                     model_local = models.MP(28*28,200,10)
-                  if args.model == 'cnn':
-                     model_local = models.CNN_MNIST()
-                  pars = (trainset, index, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local)
+                 # pars = (trainset, index, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local)
                   # initial = time.time()
-                  result = executor.submit(lambda p: client_update(*p), pars)
+                  clients[client_idx].load_model(w_global)
+                  result = executor.submit(client_update, clients[client_idx])
                   #print(index," - ",time.time()-initial)
                   results.append(result)
                # Retrieve results as they become available
@@ -224,12 +196,12 @@ if __name__=='__main__':
                best_test_acc = avg_acc
                best_dict = {rounds: best_test_acc}
                #torch.save(best_dict,'nn-trial.pt')
-            #print('Round '+ str(rounds))
-            #print(f'server stats: [loss: {running_loss / (index+1):.3f}')
-            #print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
+            print('Round '+ str(rounds))
+            print(f'server stats: [loss: {running_loss / (index+1):.3f}')
+            print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
             #test_acc.append(running_acc / (index+1))
          # torch.save(test_acc,'../stats/'+args.name)
-         print("finished ", time.time() - ini)
+         print("finished ", time.time() - initial)
 
 
 
