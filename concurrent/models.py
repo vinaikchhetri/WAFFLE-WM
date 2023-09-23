@@ -20,21 +20,47 @@ class MP(nn.Module):
         return x
 
 class CNN_MNIST(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv1 = nn.Conv2d(1, 32, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(32, 64, 5)
-        self.fc1 = nn.Linear(64 * 4 * 4, 512)
-        self.fc2 = nn.Linear(512, 10)
+    def __init__(self, in_channels=1, hidden_size=200, num_classes=10):
+        super(CNN_MNIST, self).__init__()
+        self.in_channels = in_channels
+        self.hidden_channels = hidden_size
+        self.num_classes = num_classes
+        
+        self.features = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=self.in_channels, out_channels=self.hidden_channels, kernel_size=(5, 5), padding=1, stride=1, bias=True),
+            torch.nn.ReLU(True),
+            torch.nn.MaxPool2d(kernel_size=(2, 2), padding=1),
+            torch.nn.Conv2d(in_channels=self.hidden_channels, out_channels=self.hidden_channels * 2, kernel_size=(5, 5), padding=1, stride=1, bias=True),
+            torch.nn.ReLU(True),
+            torch.nn.MaxPool2d(kernel_size=(2, 2), padding=1)
+        )
+        self.classifier = torch.nn.Sequential(
+            torch.nn.AdaptiveAvgPool2d((7, 7)),
+            torch.nn.Flatten(),
+            torch.nn.Linear(in_features=(self.hidden_channels * 2) * (7 * 7), out_features=512, bias=True),
+            torch.nn.ReLU(True),
+            torch.nn.Linear(in_features=512, out_features=self.num_classes, bias=True)
+        )
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, x.shape[1]*x.shape[2]*x.shape[3])
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
+        x = self.features(x)
+        x = self.classifier(x)
         return x
+    # def __init__(self):
+    #     super().__init__()
+    #     self.conv1 = nn.Conv2d(1, 32, 5)
+    #     self.pool = nn.MaxPool2d(2, 2)
+    #     self.conv2 = nn.Conv2d(32, 64, 5)
+    #     self.fc1 = nn.Linear(64 * 4 * 4, 512)
+    #     self.fc2 = nn.Linear(512, 10)
+
+    # def forward(self, x):
+    #     x = self.pool(F.relu(self.conv1(x)))
+    #     x = self.pool(F.relu(self.conv2(x)))
+    #     x = x.view(-1, x.shape[1]*x.shape[2]*x.shape[3])
+    #     x = F.relu(self.fc1(x))
+    #     x = self.fc2(x)
+    #     return x
 
 
 class CNN_CIFAR(nn.Module):

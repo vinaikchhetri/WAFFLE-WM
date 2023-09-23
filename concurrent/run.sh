@@ -69,3 +69,6 @@ python main.py --algo="FedAvg" --K=100 --C=1 --E=5 --B=10 --T=500 --lr=0.01 --gp
 
 
 
+
+
+

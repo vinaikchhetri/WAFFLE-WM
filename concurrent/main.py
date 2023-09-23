@@ -35,8 +35,9 @@ class CustomDataset(Dataset):
 		return img, label
 
 def client_update(client):
-   client.model_local.train()
+   
    client.model_local.to(client.device)
+   client.model_local.train()
    client.optimizer = optim.SGD(client.model_local.parameters(), lr=0.01, momentum=0.5)
    for epoch in range(client.args.E):
       running_loss = 0.0
@@ -49,9 +50,9 @@ def client_update(client):
          inputs = inputs.to(client.device)
          labels = labels.to(client.device)
 
-         #client.optimizer.zero_grad()
-         for param in client.model_local.parameters():
-            param.grad = None
+         client.optimizer.zero_grad()
+         # for param in client.model_local.parameters():
+         #    param.grad = None
          if args.model == 'nn':
             inputs = inputs.flatten(1)
          outputs = client.model_local(inputs)
@@ -63,7 +64,7 @@ def client_update(client):
          client.optimizer.step()
 
    #return client.model_local.state_dict()
-   return client
+   return client.model_local
 
 
 if __name__=='__main__':
@@ -122,6 +123,7 @@ if __name__=='__main__':
             criterion = torch.nn.CrossEntropyLoss()
          
          if args.model == 'cnn':
+            # model_global = models.CNN_MNIST()
             model_global = models.CNN_MNIST()
             model_global.to(device)
             #model_local = models.CNN_MNIST()
@@ -149,9 +151,9 @@ if __name__=='__main__':
                m = int(max(args.C*args.K, 1)) 
             
             client_indices = np.random.choice(args.K, m, replace=False)
-            #client_indices.astype(int)
-            #num_samples_list = [num_samples_dict[idx] for idx in client_indices] #list containing number of samples for each user id.
-            #total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
+            client_indices.astype(int)
+            num_samples_list = [num_samples_dict[idx] for idx in client_indices] #list containing number of samples for each user id.
+            total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
             store = {}
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(client_indices), os.cpu_count() - 1)) as executor:
@@ -160,19 +162,22 @@ if __name__=='__main__':
                for index,client_idx in enumerate(client_indices): #loop through selected clients
                  # pars = (trainset, index, client_idx, w_global.copy(), args, client_data_dict, criterion, model_local)
                   # initial = time.time()
-                  # clients[client_idx].load_model(w_global)
+                  #clients[client_idx].load_model(w_global)
                   clients[client_idx].load_model(model_global)
                   results.append(executor.submit(client_update, clients[client_idx]).result())
+                  #results.append(executor.submit(client_update, clients[client_idx]))
                   #print(index," - ",time.time()-initial)
                   
                # Retrieve results as they become available
-               # for ind,future in enumerate(concurrent.futures.as_completed(results)):
-               #    result = future.result()
-               #    store[ind] = result  
-               a = concurrent.futures.as_completed(results)   
-               print(results)    
+               # for ind,future in enumerate(results):
+               #    store[ind] = future.state_dict()
 
-            # #print("finished ", time.time() - initial)
+               # Retrieve results as they become available
+               # for ind,future in enumerate(concurrent.futures.as_completed(results)):
+               #    store[ind] = future.result().state_dict()
+  
+
+            # # #print("finished ", time.time() - initial)
             # w_global = {}
             # for layer in store[0]:
             #    sum = 0
@@ -183,7 +188,7 @@ if __name__=='__main__':
 
             # #Performing evaluation on test data.
             # model_global.load_state_dict(w_global)
-            # print(rounds)
+            
 
          #    test_loader = torch.utils.data.DataLoader(testset, batch_size=64,
          #                               shuffle=False)
