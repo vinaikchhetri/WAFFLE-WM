@@ -169,56 +169,60 @@ if __name__=='__main__':
                   #print(index," - ",time.time()-initial)
                   
                # Retrieve results as they become available
-               # for ind,future in enumerate(results):
-               #    store[ind] = future.state_dict()
+               for ind,future in enumerate(results):
+                  store[ind] = future.state_dict()
 
-               # Retrieve results as they become available
-               # for ind,future in enumerate(concurrent.futures.as_completed(results)):
-               #    store[ind] = future.result().state_dict()
+
   
 
             # # #print("finished ", time.time() - initial)
-            # w_global = {}
-            # for layer in store[0]:
-            #    sum = 0
-            #    for user_key in store:
-            #       sum += store[user_key][layer]*num_samples_list[user_key]/total_num_samples
-            #    w_global[layer] = sum
+            w_global = {}
+            for layer in store[0]:
+               sum = 0
+               for user_key in store:
+                  sum += store[user_key][layer]*num_samples_list[user_key]/total_num_samples
+               w_global[layer] = sum
             
 
-            # #Performing evaluation on test data.
-            # model_global.load_state_dict(w_global)
+            #Performing evaluation on test data.
+            model_global.load_state_dict(w_global)
             
 
-         #    test_loader = torch.utils.data.DataLoader(testset, batch_size=64,
-         #                               shuffle=False)
-         #    with torch.no_grad():
-         #       model_global.eval()
-         #       running_loss = 0.0
-         #       running_acc = 0.0
-         #       for index,data in enumerate(test_loader):  
-         #          inputs, labels = data
-         #          inputs = inputs.to(device)
-         #          if args.model == 'nn':
-         #             inputs = inputs.flatten(1)
-         #          labels = labels.to(device)
-         #          output = model_global(inputs)
-         #          loss = criterion(output, labels)
-         #          pred = torch.argmax(output, dim=1)
-         #          acc = utils.accuracy(pred, labels)
-         #          running_acc += acc
-         #          running_loss += loss
-         #    avg_acc = running_acc / (index+1)
-         #    if best_test_acc<avg_acc:
-         #       best_test_acc = avg_acc
-         #       best_dict = {rounds: best_test_acc}
-         #       #torch.save(best_dict,'nn-trial.pt')
-         #    print('Round '+ str(rounds))
-         #    print(f'server stats: [loss: {running_loss / (index+1):.3f}')
-         #    print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
-         #    #test_acc.append(running_acc / (index+1))
-         # # torch.save(test_acc,'../stats/'+args.name)
-         # print("finished ", time.time() - initial)
+            test_loader = torch.utils.data.DataLoader(testset, batch_size=64,
+                                       shuffle=False)
+            test_acc = []
+            test_loss = []
+            with torch.no_grad():
+               model_global.eval()
+               running_loss = 0.0
+               running_acc = 0.0
+               for index,data in enumerate(test_loader):  
+                  inputs, labels = data
+                  inputs = inputs.to(device)
+                  if args.model == 'nn':
+                     inputs = inputs.flatten(1)
+                  labels = labels.to(device)
+                  output = model_global(inputs)
+                  loss = criterion(output, labels)
+                  pred = torch.argmax(output, dim=1)
+                  acc = utils.accuracy(pred, labels)
+                  running_acc += acc
+                  running_loss += loss
+            # avg_acc = running_acc / (index+1)
+            # if best_test_acc<avg_acc:
+            #    best_test_acc = avg_acc
+            #    best_dict = {rounds: best_test_acc}
+               #torch.save(best_dict,'nn-trial.pt')
+            print('Round '+ str(rounds))
+            print(f'server stats: [loss: {running_loss / (index+1):.3f}')
+            print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
+            test_acc.append(running_acc / (index+1))
+            test_loss.append(running_loss / (index+1))
+         torch.save(test_acc,'../new_stats/mnist/'+'acc-'+args.name)
+         torch.save(test_loss,'../new_stats/mnist/'+'loss-'+args.name)
+         # torch.save(test_acc,'../new_stats/mnist/'+'acc-'+args.name)
+        
+         print("finished ", time.time() - initial)
 
 
 

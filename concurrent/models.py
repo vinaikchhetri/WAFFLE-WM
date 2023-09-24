@@ -3,21 +3,42 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class MP(nn.Module):
+class MP(torch.nn.Module): 
     def __init__(self, in_dim, hid_dim, out_dim):
-        super().__init__()
-        self.hl1 = nn.Linear(in_dim, hid_dim)
-        nn.init.xavier_uniform_(self.hl1.weight)
-        nn.init.zeros_(self.hl1.bias)
-        self.hl2 = nn.Linear(hid_dim, out_dim)
-        nn.init.xavier_uniform_(self.hl2.weight)
-        nn.init.zeros_(self.hl2.bias)
-        self.ReLU = nn.ReLU()
-
+        super(MP, self).__init__()
+        self.in_features = in_dim
+        self.num_hiddens = hid_dim
+        self.num_classes = out_dim
+        
+        self.features = torch.nn.Sequential(
+            torch.nn.Flatten(),
+            torch.nn.Linear(in_features=self.in_features, out_features=self.num_hiddens, bias=True),
+            torch.nn.ReLU(True),
+            torch.nn.Linear(in_features=self.num_hiddens, out_features=self.num_hiddens, bias=True),
+            torch.nn.ReLU(True)
+        )
+        self.classifier = torch.nn.Linear(in_features=self.num_hiddens, out_features=self.num_classes, bias=True)
+        
     def forward(self, x):
-        x = self.ReLU(self.hl1(x))
-        x = self.ReLU(self.hl2(x))
+        x = self.features(x)
+        x = self.classifier(x)
         return x
+
+# class MP(nn.Module):
+#     def __init__(self, in_dim, hid_dim, out_dim):
+#         super().__init__()
+#         self.hl1 = nn.Linear(in_dim, hid_dim)
+#         nn.init.xavier_uniform_(self.hl1.weight)
+#         nn.init.zeros_(self.hl1.bias)
+#         self.hl2 = nn.Linear(hid_dim, out_dim)
+#         nn.init.xavier_uniform_(self.hl2.weight)
+#         nn.init.zeros_(self.hl2.bias)
+#         self.ReLU = nn.ReLU()
+
+#     def forward(self, x):
+#         x = self.ReLU(self.hl1(x))
+#         x = self.ReLU(self.hl2(x))
+#         return x
 
 class CNN_MNIST(nn.Module):
     def __init__(self, in_channels=1, hidden_size=200, num_classes=10):
