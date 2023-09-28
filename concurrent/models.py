@@ -102,3 +102,6 @@ class CNN_CIFAR(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
+
+

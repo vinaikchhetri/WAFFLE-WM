@@ -2,19 +2,21 @@ from torch.utils.data import Dataset
 import torch
 import models
 import torch.optim as optim
+from torchvision.models import resnet18
 
 class CustomDataset(Dataset):
-	def __init__(self, dataset, idxs):
-		self.dataset = dataset
-		self.idxs = idxs
-	def __len__(self):
-		return len(self.idxs)
-	def __getitem__(self, idx):
-		tup = self.dataset[self.idxs[idx]]
-		img = tup[0]
-		label = tup[1]
-		#return torch.tensor(img), torch.tensor(label)
-		return img, label
+    def __init__(self, dataset, idxs):
+        self.dataset = dataset
+        self.idxs = idxs
+        
+    def __len__(self):
+        return len(self.idxs)
+    def __getitem__(self, idx):
+        tup = self.dataset[self.idxs[idx]]
+        img = tup[0]
+        label = tup[1]
+
+        return img, label
 
 class Client():
     def __init__(self, data_client, trainset, args, device):
@@ -41,6 +43,12 @@ class Client():
          
         if args.model == 'cnn':
             self.model_local = models.CNN_MNIST()
+            self.criterion = torch.nn.CrossEntropyLoss()
+            self.model_local.to(device)
+            self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
+        
+        if args.model == 'resnet':
+            self.model_local = resnet18(num_classes=100)
             self.criterion = torch.nn.CrossEntropyLoss()
             self.model_local.to(device)
             self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
