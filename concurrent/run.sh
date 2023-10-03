@@ -66,26 +66,26 @@
 
 # Figure 2
 #iid cnn
-for b in 8 50 10
-do
-    for e in 1 5 20 
-    do
-        python3 main.py \
-            --algo="FedAvg" --K=100 --C=0.1 --E=$e --B=$b --T=1000 --lr=0.01 --gpu="gpu" --model="cnn" --name="fig2_cnn_B${b}_E${e}" > ../new_logs/mnist/"fig2_cnn_B${b}_E${e}"
+# for b in 8 50 10
+# do
+#     for e in 1 5 20 
+#     do
+#         python3 main.py \
+#             --algo="FedAvg" --K=100 --C=0.1 --E=$e --B=$b --T=1000 --lr=0.01 --gpu="gpu" --model="cnn" --name="fig2_cnn_B${b}_E${e}" > ../new_logs/mnist/"fig2_cnn_B${b}_E${e}"
           
-    done     
-done 
+#     done     
+# done 
 
-## Pathological Non-IID split cnn
-for b in 8 50 10
-do
-    for e in 1 5 20 
-    do
-        python3 main.py \
-            --algo="FedAvg" --K=100 --C=0.1 --E=$e --B=$b --T=1000 --lr=0.01 --gpu="gpu" --model="cnn" --iid="false" --name="niid_fig2_cnn_B${b}_E${e}" > ../new_logs/mnist/"niid_fig2_cnn_B${b}_E${e}"
+# ## Pathological Non-IID split cnn
+# for b in 8 50 10
+# do
+#     for e in 1 5 20 
+#     do
+#         python3 main.py \
+#             --algo="FedAvg" --K=100 --C=0.1 --E=$e --B=$b --T=1000 --lr=0.01 --gpu="gpu" --model="cnn" --iid="false" --name="niid_fig2_cnn_B${b}_E${e}" > ../new_logs/mnist/"niid_fig2_cnn_B${b}_E${e}"
           
-    done     
-done 
+#     done     
+# done 
 
 
 # # Figure 7
@@ -114,6 +114,48 @@ done
 
 
 
+# #iid resnet
+# for b in 8 50 10
+# do
+#     for e in 1 5 20 
+#     do
+#         python3 main.py \
+#             --algo="FedAvg" --K=100 --C=0.1 --E=$e --B=$b --T=2000 --lr=0.01 --gpu="gpu" --model="resnet" --name="resnet_B${b}_E${e}" > ../new_logs/cifar-100/"resnet_B${b}_E${e}"
+          
+#     done     
+# done 
+
+# ## Pathological Non-IID split resnet
+# for b in 8 50 10
+# do
+#     for e in 1 5 20 
+#     do
+#         python3 main.py \
+#             --algo="FedAvg" --K=100 --C=0.1 --E=$e --B=$b --T=2000 --lr=0.01 --gpu="gpu" --model="resnet" --iid="false" --name="niid_resnet_B${b}_E${e}" > ../new_logs/cifar-100/"niid_resnet_B${b}_E${e}"
+          
+#     done     
+# done 
 
 
+#-----
+#iid resnet
+# for b in 8 50 10
+# do
+#     for e in 1 5 20 
+#     do
+#         python3 main.py \
+#             --algo="FedAvg" --dataset 'cifar-100' --K=100 --C=0.1 --E=$e --B=$b --T=1000 --lr=0.01 --gpu="gpu" --model="resnet" --name="resnet_B${b}_E${e}" > ../new_logs/cifar-100/"resnet_B${b}_E${e}"
+          
+#     done     
+# done 
 
+## Pathological Non-IID split resnet
+for b in 8 50 10
+do
+    for e in 1 5 20   
+    do
+        python3 main.py \
+            --algo="FedAvg" --dataset 'cifar-100' --K=100 --C=0.1 --E=$e --B=$b --T=1000 --lr=0.01 --gpu="gpu" --model="resnet" --iid="false" --name="niid_resnet_B${b}_E${e}" > ../new_logs/cifar-100/"niid_resnet_B${b}_E${e}"
+          
+    done     
+done 

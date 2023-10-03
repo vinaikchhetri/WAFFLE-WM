@@ -24,6 +24,7 @@ class Client():
         self.args = args
         self.device = device
         self.trainset = trainset
+        self.loss = None
         self.cd = CustomDataset(self.trainset, self.data_client)
         if args.B == 8:
             self.bs = len(trainset)

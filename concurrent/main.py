@@ -64,9 +64,10 @@ def client_update(client):
          loss.backward()
          #print(client_idx, time.time()-initial)
          client.optimizer.step()
+      
 
    #return client.model_local.state_dict()
-   return client.model_local
+   return client.model_local, loss
 
 
 if __name__=='__main__':
@@ -159,7 +160,7 @@ if __name__=='__main__':
             num_samples_list = [num_samples_dict[idx] for idx in client_indices] #list containing number of samples for each user id.
             total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
             store = {}
-
+            avg_loss= 0 
             with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(client_indices), os.cpu_count() - 1)) as executor:
                results = []
                # Submit tasks to the executor
@@ -174,8 +175,9 @@ if __name__=='__main__':
                   
                # Retrieve results as they become available
                for ind,future in enumerate(results):
-                  store[ind] = future.state_dict()
-
+                  store[ind] = future[0].state_dict()
+                  avg_loss+=future[1]
+               avg_loss/=len(results)
 
   
 
@@ -322,6 +324,7 @@ if __name__=='__main__':
             num_samples_list = [num_samples_dict[idx] for idx in client_indices] #list containing number of samples for each user id.
             total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
             store = {}
+            avg_loss= 0 
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(client_indices), os.cpu_count() - 1)) as executor:
                results = []
@@ -337,7 +340,9 @@ if __name__=='__main__':
                   
                # Retrieve results as they become available
                for ind,future in enumerate(results):
-                  store[ind] = future.state_dict()
+                  store[ind] = future[0].state_dict()
+                  avg_loss+=future[1]
+               avg_loss/=len(results)
 
 
   
@@ -381,10 +386,12 @@ if __name__=='__main__':
             #    best_dict = {rounds: best_test_acc}
                #torch.save(best_dict,'nn-trial.pt')
             print('Round '+ str(rounds))
-            print(f'server stats: [loss: {running_loss / (index+1):.3f}')
+            
+            print(f'server stats: [test-loss: {running_loss / (index+1):.3f}')
+            print(f'server stats: [train-loss: { avg_loss:.3f}')
             print(f'server stats: [accuracy: {running_acc / (index+1):.3f}')
-            test_acc.append(running_acc / (index+1))
-            test_loss.append(running_loss / (index+1))
+            #test_acc.append(running_acc / (index+1))
+            #test_loss.append(running_loss / (index+1))
          #torch.save(test_acc,'../new_stats/mnist/'+'acc-'+args.name)
          #torch.save(test_loss,'../new_stats/mnist/'+'loss-'+args.name)
          # torch.save(test_acc,'../new_stats/mnist/'+'acc-'+args.name)
