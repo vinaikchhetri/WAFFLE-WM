@@ -56,3 +56,27 @@ class Client():
         
     def load_model(self, model_global):
         self.model_local.load_state_dict(model_global.state_dict())
+
+    def client_update(self):
+        self.model_local.to(self.device)
+        self.model_local.train()
+        self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
+        for epoch in range(self.args.E):
+            running_loss = 0.0
+            running_acc = 0.0
+            for index,data in enumerate(self.data_loader):
+                
+                inputs, labels = data
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+                self.optimizer.zero_grad()
+                # for param in client.model_local.parameters():
+                #    param.grad = None
+                if self.args.model == 'nn':
+                    inputs = inputs.flatten(1)
+                outputs = self.model_local(inputs)
+                pred = torch.argmax(outputs, dim=1)
+                loss = self.criterion(outputs, labels)
+                loss.backward()
+                self.optimizer.step()
+        return self.model_local, loss
