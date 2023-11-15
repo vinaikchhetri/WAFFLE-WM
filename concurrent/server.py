@@ -85,8 +85,11 @@ class Server():
                     sum += store[user_key][layer]*num_samples_list[user_key]/total_num_samples
                 w_global[layer] = sum
             
-            #Performing evaluation on test data.
             self.model_global.load_state_dict(w_global)
+            #Retrain the server on the watermarks
+            retrain()
+
+            #Performing evaluation on test data.
             rl,ra = self.test()
 
             print('Round '+ str(rounds))
@@ -115,4 +118,26 @@ class Server():
                 running_loss += loss
         return running_loss/index+1, running_acc/index+1
             
-
+    #retraining the global model after each aggregation round.        
+    def retrain(self):
+        tr = 0
+        while(tr<self.retraining_rounds):
+            self.model_global.train()
+            self.optimizer = optim.SGD(self.model_global.parameters(), lr=0.01, momentum=0.5)
+            
+            for epoch in range(self.args.E):
+                running_loss = 0.0
+                running_acc = 0.0
+                for index,data in enumerate(self.watermark_data_loader):
+                    inputs, labels = data
+                    inputs = inputs.to(self.device)
+                    labels = labels.to(self.device)
+                    self.optimizer.zero_grad()
+                    if self.args.model == 'nn':
+                        inputs = inputs.flatten(1)
+                    outputs = self.model_global(inputs)
+                    pred = torch.argmax(outputs, dim=1)
+                    loss = self.criterion(outputs, labels)
+                    loss.backward()
+                    self.optimizer.step()
+        return self.model_local, loss
