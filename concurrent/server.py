@@ -21,8 +21,9 @@ class Server():
         self.C = self.args.C
         self.num_samples_dict = {} #number of samples per user.
         self.clients = []
-        self.trainset,self.testset,self.client_data_dict = data_splitter.splitter(self.args)
+        self.trainset,self.testset,self.client_data_dict,self.watermark_set = data_splitter.splitter(self.args)
         self.data_loader = torch.utils.data.DataLoader(self.testset, batch_size=64, shuffle=True)
+        self.watermark_loader = torch.utils.data.DataLoader(watermark_set, batch_size=50, shuffle = True)
         if self.args.gpu == "gpu":
             self.device = torch.device('cuda:0')
         else:
@@ -87,7 +88,7 @@ class Server():
             
             self.model_global.load_state_dict(w_global)
             #Retrain the server on the watermarks
-            retrain()
+            #retrain()
 
             #Performing evaluation on test data.
             rl,ra = self.test()
@@ -119,25 +120,25 @@ class Server():
         return running_loss/index+1, running_acc/index+1
             
     #retraining the global model after each aggregation round.        
-    def retrain(self):
-        tr = 0
-        while(tr<self.retraining_rounds):
-            self.model_global.train()
-            self.optimizer = optim.SGD(self.model_global.parameters(), lr=0.01, momentum=0.5)
+    # def retrain(self):
+    #     tr = 0
+    #     while(tr<self.retraining_rounds):
+    #         self.model_global.train()
+    #         self.optimizer = optim.SGD(self.model_global.parameters(), lr=0.01, momentum=0.5)
             
-            for epoch in range(self.args.E):
-                running_loss = 0.0
-                running_acc = 0.0
-                for index,data in enumerate(self.watermark_data_loader):
-                    inputs, labels = data
-                    inputs = inputs.to(self.device)
-                    labels = labels.to(self.device)
-                    self.optimizer.zero_grad()
-                    if self.args.model == 'nn':
-                        inputs = inputs.flatten(1)
-                    outputs = self.model_global(inputs)
-                    pred = torch.argmax(outputs, dim=1)
-                    loss = self.criterion(outputs, labels)
-                    loss.backward()
-                    self.optimizer.step()
-        return self.model_local, loss
+    #         for epoch in range(self.args.E):
+    #             running_loss = 0.0
+    #             running_acc = 0.0
+    #             for index,data in enumerate(self.watermark_data_loader):
+    #                 inputs, labels = data
+    #                 inputs = inputs.to(self.device)
+    #                 labels = labels.to(self.device)
+    #                 self.optimizer.zero_grad()
+    #                 if self.args.model == 'nn':
+    #                     inputs = inputs.flatten(1)
+    #                 outputs = self.model_global(inputs)
+    #                 pred = torch.argmax(outputs, dim=1)
+    #                 loss = self.criterion(outputs, labels)
+    #                 loss.backward()
+    #                 self.optimizer.step()
+    #     return self.model_local, loss

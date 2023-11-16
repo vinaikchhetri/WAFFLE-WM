@@ -1,6 +1,9 @@
 import torchvision
 import torchvision.transforms as transforms
 import numpy as np
+import watermark
+import data_handle
+import argparse
 
 def splitter(args):
     clients = []
@@ -17,8 +20,17 @@ def splitter(args):
                                         torchvision.transforms.Normalize(
                                             (0.1307,), (0.3081,))
                                     ]))
+            # generate train=test watermark dataset loader.
+            mean = [0.5]#[0.1307]
+            std = [0.5]#[0.3081]
+            greyscale = [torchvision.transforms.Grayscale()] 
+            watermark_transforms = torchvision.transforms.Compose(greyscale + [
+                    torchvision.transforms.ToTensor(),
+                    torchvision.transforms.Normalize(mean, std)
+                ])
+            watermarkset = data_handle.Pattern(root_dir='../data/datasets/MPATTERN/' , train= True, transform=watermark_transforms , download= True)
+            
 
-         
             if args.iid == "true":
                 #construct an iid mnist dataset.
                 #distribute data among clients
@@ -29,6 +41,7 @@ def splitter(args):
                     selected_indices = np.random.choice(available_indices, 600, replace=False)
                     client_data_dict[client_idx] = selected_indices
                     available_indices = np.setdiff1d(available_indices, selected_indices)
+
             
             else:
                 #construct a non-iid mnist dataset.
@@ -96,8 +109,27 @@ def splitter(args):
                     available_indices = np.setdiff1d(available_indices, selected_indices)
         
     
-        return trainset,testset,client_data_dict
+        return trainset,testset,client_data_dict,watermarkset
 
             
+# parser = argparse.ArgumentParser()
+# parser.add_argument(algo="FedAvg", K=100, C=0, E=1, B=8, T=1500, lr=0.01, gpu="gpu", model="nn")
+# args = parser.parse_args()
+parser = argparse.ArgumentParser(description='Your program description')
 
+# Add arguments
+parser.add_argument('-algo', type=str, default="FedAvg", help='Description of argument k')
+parser.add_argument('--K', type=int, default=100, help='Description of argument name')
+parser.add_argument('--C', type=int, default=0.2, help='Description of argument name')
+parser.add_argument('--e', type=int, default=1, help='Description of argument name')
+parser.add_argument('--B', type=int, default=8, help='Description of argument name')
+parser.add_argument('--T', type=int, default=1500, help='Description of argument name')
+parser.add_argument('--lr', type=float, default=0.01, help='Description of argument name')
+parser.add_argument('--gpu', type=str, default="gpu", help='Description of argument name')
+parser.add_argument('--model', type=str, default="nn", help='Description of argument name')
+parser.add_argument('--dataset', type=str, default="mnist", help='Description of argument name')
+parser.add_argument('--iid', type=str, default="true", help='Description of argument name')
 
+# Parse the command-line arguments
+args = parser.parse_args()
+splitter(args)
