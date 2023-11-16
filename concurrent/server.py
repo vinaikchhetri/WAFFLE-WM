@@ -19,11 +19,12 @@ class Server():
         self.K = self.args.K
         self.T = self.args.T
         self.C = self.args.C
+        self.retrainingR = self.args.retrainingR
         self.num_samples_dict = {} #number of samples per user.
         self.clients = []
         self.trainset,self.testset,self.client_data_dict,self.watermark_set = data_splitter.splitter(self.args)
         self.data_loader = torch.utils.data.DataLoader(self.testset, batch_size=64, shuffle=True)
-        self.watermark_loader = torch.utils.data.DataLoader(watermark_set, batch_size=50, shuffle = True)
+        self.watermark_loader = torch.utils.data.DataLoader(self.watermark_set, batch_size=50, shuffle = True)
         if self.args.gpu == "gpu":
             self.device = torch.device('cuda:0')
         else:
@@ -87,16 +88,30 @@ class Server():
                 w_global[layer] = sum
             
             self.model_global.load_state_dict(w_global)
-            #Retrain the server on the watermarks
-            #retrain()
 
             #Performing evaluation on test data.
             rl,ra = self.test()
-
+            print('Before watermarking')
             print('Round '+ str(rounds))
             print(f'server stats: [test-loss: {rl:.3f}')
             print(f'server stats: [train-loss: { avg_loss:.3f}')
             print(f'server stats: [accuracy: {ra:.3f}')
+            
+
+            #Retrain the server on the watermarks
+            if not self.retrainingR == 0:
+                self.retrain()
+
+            #Performing evaluation on test data.
+            rl,ra = self.test()
+
+            print('After watermarking')
+            print('Round '+ str(rounds))
+            print(f'server stats: [test-loss: {rl:.3f}')
+            print(f'server stats: [train-loss: { avg_loss:.3f}')
+            print(f'server stats: [accuracy: {ra:.3f}')
+
+            print()
         print("finished ", time.time() - initial)
 
 
@@ -120,25 +135,26 @@ class Server():
         return running_loss/index+1, running_acc/index+1
             
     #retraining the global model after each aggregation round.        
-    # def retrain(self):
-    #     tr = 0
-    #     while(tr<self.retraining_rounds):
-    #         self.model_global.train()
-    #         self.optimizer = optim.SGD(self.model_global.parameters(), lr=0.01, momentum=0.5)
+    def retrain(self):
+        tr = 0
+        while(tr<self.retrainingR):
+            tr+=1
+            self.model_global.train()
+            self.optimizer = optim.SGD(self.model_global.parameters(), lr=0.01, momentum=0.5)
             
-    #         for epoch in range(self.args.E):
-    #             running_loss = 0.0
-    #             running_acc = 0.0
-    #             for index,data in enumerate(self.watermark_data_loader):
-    #                 inputs, labels = data
-    #                 inputs = inputs.to(self.device)
-    #                 labels = labels.to(self.device)
-    #                 self.optimizer.zero_grad()
-    #                 if self.args.model == 'nn':
-    #                     inputs = inputs.flatten(1)
-    #                 outputs = self.model_global(inputs)
-    #                 pred = torch.argmax(outputs, dim=1)
-    #                 loss = self.criterion(outputs, labels)
-    #                 loss.backward()
-    #                 self.optimizer.step()
-    #     return self.model_local, loss
+            for epoch in range(self.args.E):
+                running_loss = 0.0
+                running_acc = 0.0
+                for index,data in enumerate(self.watermark_loader):
+                    inputs, labels = data
+                    inputs = inputs.to(self.device)
+                    labels = labels.to(self.device)
+                    self.optimizer.zero_grad()
+                    if self.args.model == 'nn':
+                        inputs = inputs.flatten(1)
+                    outputs = self.model_global(inputs)
+                    pred = torch.argmax(outputs, dim=1)
+                    loss = self.criterion(outputs, labels)
+                    loss.backward()
+                    self.optimizer.step()
+        # return self.model_global, loss

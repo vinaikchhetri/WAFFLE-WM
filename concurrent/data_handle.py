@@ -102,9 +102,11 @@ class Pattern(data.Dataset):
         for i in range(0, self.n_classes):
             dirs = os.path.join(self.root_dir, '%d' % i)
             for idx, fimg in enumerate(glob.glob(os.path.join(dirs, '*.png'))):
+                
                 if idx < 10:
                     self.data_frame.append(fimg)
                     self.label_frame.append(i)
+
 
     def __len__(self) -> int:
         return len(self.data_frame)

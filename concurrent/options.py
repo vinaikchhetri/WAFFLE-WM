@@ -18,6 +18,7 @@ def arg_parser():
     parser.add_argument("--model", type=str, default = "nn", help="model choice.")
     parser.add_argument("--gpu", type=str, default = "cpu", help="gpu or cpu.")
     parser.add_argument("--name", type=str,  help="save stats list as ...")
+    parser.add_argument("--retrainingR", type=int,  help="number of retraining rounds")
     args = parser.parse_args()
     
     return args

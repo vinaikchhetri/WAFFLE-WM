@@ -30,7 +30,7 @@ def splitter(args):
                 ])
             watermarkset = data_handle.Pattern(root_dir='../data/datasets/MPATTERN/' , train= True, transform=watermark_transforms , download= True)
             
-
+            
             if args.iid == "true":
                 #construct an iid mnist dataset.
                 #distribute data among clients
@@ -115,21 +115,22 @@ def splitter(args):
 # parser = argparse.ArgumentParser()
 # parser.add_argument(algo="FedAvg", K=100, C=0, E=1, B=8, T=1500, lr=0.01, gpu="gpu", model="nn")
 # args = parser.parse_args()
-parser = argparse.ArgumentParser(description='Your program description')
 
-# Add arguments
-parser.add_argument('-algo', type=str, default="FedAvg", help='Description of argument k')
-parser.add_argument('--K', type=int, default=100, help='Description of argument name')
-parser.add_argument('--C', type=int, default=0.2, help='Description of argument name')
-parser.add_argument('--e', type=int, default=1, help='Description of argument name')
-parser.add_argument('--B', type=int, default=8, help='Description of argument name')
-parser.add_argument('--T', type=int, default=1500, help='Description of argument name')
-parser.add_argument('--lr', type=float, default=0.01, help='Description of argument name')
-parser.add_argument('--gpu', type=str, default="gpu", help='Description of argument name')
-parser.add_argument('--model', type=str, default="nn", help='Description of argument name')
-parser.add_argument('--dataset', type=str, default="mnist", help='Description of argument name')
-parser.add_argument('--iid', type=str, default="true", help='Description of argument name')
+# parser = argparse.ArgumentParser(description='Your program description')
 
-# Parse the command-line arguments
-args = parser.parse_args()
-splitter(args)
+# # Add arguments
+# parser.add_argument('-algo', type=str, default="FedAvg", help='Description of argument k')
+# parser.add_argument('--K', type=int, default=100, help='Description of argument name')
+# parser.add_argument('--C', type=int, default=0.2, help='Description of argument name')
+# parser.add_argument('--e', type=int, default=1, help='Description of argument name')
+# parser.add_argument('--B', type=int, default=8, help='Description of argument name')
+# parser.add_argument('--T', type=int, default=1500, help='Description of argument name')
+# parser.add_argument('--lr', type=float, default=0.01, help='Description of argument name')
+# parser.add_argument('--gpu', type=str, default="gpu", help='Description of argument name')
+# parser.add_argument('--model', type=str, default="nn", help='Description of argument name')
+# parser.add_argument('--dataset', type=str, default="mnist", help='Description of argument name')
+# parser.add_argument('--iid', type=str, default="true", help='Description of argument name')
+
+# # Parse the command-line arguments
+# args = parser.parse_args()
+# splitter(args)
