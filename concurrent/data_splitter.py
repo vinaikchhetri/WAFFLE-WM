@@ -30,6 +30,7 @@ def splitter(args):
                 ])
             watermarkset = data_handle.Pattern(root_dir='../data/datasets/MPATTERN/' , train= True, transform=watermark_transforms , download= True)
             
+
             
             if args.iid == "true":
                 #construct an iid mnist dataset.
@@ -106,6 +107,47 @@ def splitter(args):
                         temp = sorted_indices[selected_indices[index]*50:selected_indices[index]*50+50]               
                         merged_shards = np.concatenate((merged_shards, np.expand_dims(temp,0)), axis=1)
                     client_data_dict[client_idx] = merged_shards[0].astype(int)
+                    available_indices = np.setdiff1d(available_indices, selected_indices)
+
+        if args.dataset == "cifar-10":
+            dataset_name = 'cifar-10'
+            train_data = torchvision.datasets.CIFAR10('./', train=True, download=True)
+            transform = transforms.Compose(
+                [transforms.RandomHorizontalFlip(),
+                transforms.RandomCrop(32, padding=4),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+            trainset = torchvision.datasets.CIFAR10(root='../data/'+dataset_name,
+                                            train=True,
+                                            download=True,
+                                            transform=transform)
+
+            testset = torchvision.datasets.CIFAR10(root='../data/'+dataset_name,
+                                            train=False,
+                                            download=True,
+                                            transform=transform)
+
+            # mean = [0.5, 0.5, 0.5]
+            # std = [0.5, 0.5, 0.5]
+            mean = [0.485, 0.456, 0.406]
+            std  = [0.229, 0.224, 0.225]
+
+            watermark_transforms = torchvision.transforms.Compose([
+            torchvision.transforms.Resize(32),
+            torchvision.transforms.CenterCrop(32),
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize(mean, std)
+        ])
+            watermarkset = data_handle.Pattern(root_dir='../data/datasets/CPATTERN/' , train= True, transform=watermark_transforms , download= True)
+            if args.iid == "true":
+                #construct an iid mnist dataset.
+                #distribute data among clients
+                client_data_dict = {}
+                all_indices = np.arange(0,len(trainset))
+                available_indices = np.arange(len(trainset))
+                for client_idx in range(args.K):
+                    selected_indices = np.random.choice(available_indices, 500, replace=False)
+                    client_data_dict[client_idx] = selected_indices
                     available_indices = np.setdiff1d(available_indices, selected_indices)
         
     

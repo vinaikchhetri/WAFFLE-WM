@@ -3,6 +3,7 @@ import torch
 import models
 import torch.optim as optim
 from torchvision.models import resnet18
+from torchvision.models import vgg16
 
 class CustomDataset(Dataset):
     def __init__(self, dataset, idxs):
@@ -49,10 +50,24 @@ class Client():
             self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
         
         if args.model == 'resnet':
-            self.model_local = resnet18(num_classes=100)
+            self.model_local = resnet18(num_classes=10)
             self.criterion = torch.nn.CrossEntropyLoss()
             self.model_local.to(device)
             self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
+
+        if args.model == 'MNIST_L5':
+            self.model_local = models.MNIST_L5()
+            self.criterion = torch.nn.CrossEntropyLoss()
+            self.model_local.to(device)
+            self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
+
+        if args.model == 'vgg':
+            self.model_local = vgg16(pretrained=True, progress=True)
+            self.criterion = torch.nn.CrossEntropyLoss()
+            self.model_local.to(device)
+            self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
+            
+
         
     def load_model(self, model_global):
         self.model_local.load_state_dict(model_global.state_dict())
