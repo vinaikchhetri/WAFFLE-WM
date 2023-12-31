@@ -4,6 +4,7 @@ import numpy as np
 import watermark
 import data_handle
 import argparse
+import watermark
 
 def splitter(args):
     clients = []
@@ -28,10 +29,8 @@ def splitter(args):
                     torchvision.transforms.ToTensor(),
                     torchvision.transforms.Normalize(mean, std)
                 ])
-            watermarkset = data_handle.Pattern(root_dir='../data/datasets/MPATTERN/' , train= True, transform=watermark_transforms , download= True)
-            #print("$$$$$$$$$",len(watermarkset))
-
-            
+            watermark.construct_watermarks(dataset_name)
+            watermarkset = data_handle.Pattern(root_dir='../data/datasets/MPATTERN/' , train= True, transform=watermark_transforms , download= True, n_classes=10)
             if args.iid == "true":
                 #construct an iid mnist dataset.
                 #distribute data among clients
@@ -42,15 +41,12 @@ def splitter(args):
                     selected_indices = np.random.choice(available_indices, 600, replace=False)
                     client_data_dict[client_idx] = selected_indices
                     available_indices = np.setdiff1d(available_indices, selected_indices)
-
-            
             else:
                 #construct a non-iid mnist dataset.
                 #distribute data among clients
                 client_data_dict = {}
                 labels = trainset.targets.numpy()
                 sorted_indices = np.argsort(labels)
-
                 all_indices = np.arange(0,200)
                 available_indices = np.arange(0,200)
                 for client_idx in range(args.K):
@@ -60,7 +56,6 @@ def splitter(args):
                     merged_shards = np.concatenate((np.expand_dims(A, 0), np.expand_dims(B,0)), axis=1)
                     client_data_dict[client_idx] = merged_shards[0]
                     available_indices = np.setdiff1d(available_indices, selected_indices)
-
         if args.dataset == "cifar-100":
             dataset_name = 'cifar-100'
             train_data = torchvision.datasets.CIFAR100('./', train=True, download=True)
@@ -80,15 +75,14 @@ def splitter(args):
                                             transform=transform)
             mean = [0.5074,0.4867,0.4411]
             std  = [0.2011,0.1987,0.2025]
-
             watermark_transforms = torchvision.transforms.Compose([
             torchvision.transforms.Resize(32),
             torchvision.transforms.CenterCrop(32),
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize(mean, std)
         ])
-
-            watermarkset = data_handle.Pattern(root_dir='../data/datasets/HPATTERN/' , train= True, transform=watermark_transforms , download= True)
+            watermark.construct_watermarks(dataset_name)
+            watermarkset = data_handle.Pattern(root_dir='../data/datasets/HPATTERN/' , train= True, transform=watermark_transforms , download= True, n_classes=100)
             if args.iid == "true":
                 #construct an iid mnist dataset.
                 #distribute data among clients
@@ -98,19 +92,15 @@ def splitter(args):
                 for client_idx in range(args.K):
                     selected_indices = np.random.choice(available_indices, 500, replace=False)
                     client_data_dict[client_idx] = selected_indices
-                    available_indices = np.setdiff1d(available_indices, selected_indices)
-            
+                    available_indices = np.setdiff1d(available_indices, selected_indices)  
             else:
                 #construct a non-iid mnist dataset.
                 #distribute data among clients
-                client_data_dict = {}
-            
+                client_data_dict = {}    
                 labels = np.asarray(trainset.targets)
                 sorted_indices = np.argsort(labels)
-
                 all_indices = np.arange(0,1000)
-                available_indices = np.arange(0,1000)
-            
+                available_indices = np.arange(0,1000)    
                 for client_idx in range(args.K):
                     merged_shards = np.array([[]])
                     selected_indices = np.random.choice(available_indices, 10, replace=False)
@@ -119,7 +109,6 @@ def splitter(args):
                         merged_shards = np.concatenate((merged_shards, np.expand_dims(temp,0)), axis=1)
                     client_data_dict[client_idx] = merged_shards[0].astype(int)
                     available_indices = np.setdiff1d(available_indices, selected_indices)
-
         if args.dataset == "cifar-10":
             dataset_name = 'cifar-10'
             train_data = torchvision.datasets.CIFAR10('./', train=True, download=True)
@@ -137,19 +126,18 @@ def splitter(args):
                                             train=False,
                                             download=True,
                                             transform=transform)
-
             # mean = [0.5, 0.5, 0.5]
             # std = [0.5, 0.5, 0.5]
             mean = [0.485, 0.456, 0.406]
             std  = [0.229, 0.224, 0.225]
-
             watermark_transforms = torchvision.transforms.Compose([
             torchvision.transforms.Resize(32),
             torchvision.transforms.CenterCrop(32),
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize(mean, std)
         ])
-            watermarkset = data_handle.Pattern(root_dir='../data/datasets/CPATTERN/' , train= True, transform=watermark_transforms , download= True)
+            watermark.construct_watermarks(dataset_name)
+            watermarkset = data_handle.Pattern(root_dir='../data/datasets/CPATTERN/' , train= True, transform=watermark_transforms , download= True, n_classes=10)
             if args.iid == "true":
                 #construct an iid mnist dataset.
                 #distribute data among clients
@@ -161,7 +149,6 @@ def splitter(args):
                     client_data_dict[client_idx] = selected_indices
                     available_indices = np.setdiff1d(available_indices, selected_indices)
         
-    
         return trainset,testset,client_data_dict,watermarkset
 
             

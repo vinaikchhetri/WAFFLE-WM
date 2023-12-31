@@ -53,7 +53,10 @@ class Client():
         
         if args.model == 'resnet':
             # self.model_local = resnet18(num_classes=10)
-            self.model_local = models.ResNet(18)
+            if self.args.dataset == "cifar-10":
+                self.model_local = models.ResNet(18, num_classes = 10)
+            else:
+                self.model_local = models.ResNet(18, num_classes = 100)
             self.criterion = torch.nn.CrossEntropyLoss()
             self.model_local.to(device)
             self.optimizer = optim.SGD(self.model_local.parameters(), lr=self.args.lr, momentum=0.5)

@@ -50,7 +50,10 @@ class Server():
         
         if self.model == 'resnet':
             #self.model_global = resnet18(num_classes=10)
-            self.model_global = models.ResNet(18)
+            if self.args.dataset == "cifar-10":
+                self.model_global = models.ResNet(18, num_classes = 10)
+            else:
+                self.model_global = models.ResNet(18, num_classes = 100)
             self.criterion = torch.nn.CrossEntropyLoss()
             self.model_global.to(self.device)
     
@@ -100,7 +103,7 @@ class Server():
             client_indices.astype(int)
             overlap = np.intersect1d(client_indices, self.adversary_indices)
             self.count_adv.append(len(overlap))
-            print("overlap ", len(overlap))
+
             num_samples_list = [self.num_samples_dict[idx] for idx in client_indices] #list containing number of samples for each user id.
             total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
             store = {}
@@ -128,10 +131,12 @@ class Server():
 
             #Performing evaluation on test data.
             rl,ra = self.test()
-            print('Before watermarking, main task')
             print('Round '+ str(rounds))
+            print()
+            print("Number of adversaries participating in this round: ", len(overlap))
+            print()
+            print('Before watermarking, main task')
             print(f'server stats: [test-loss: {rl:.3f}')
-            #print(f'server stats: [train-loss: { avg_loss:.3f}')
             print(f'server stats: [test-accuracy: {ra:.3f}')
             print()
             test_loss_before_embedding.append(rl) 
