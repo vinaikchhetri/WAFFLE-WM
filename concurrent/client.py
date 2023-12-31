@@ -4,6 +4,7 @@ import models
 import torch.optim as optim
 from torchvision.models import resnet18
 from torchvision.models import vgg16
+import torch.nn.utils.prune as prune
 
 class CustomDataset(Dataset):
     def __init__(self, dataset, idxs):
@@ -20,7 +21,8 @@ class CustomDataset(Dataset):
         return img, label
 
 class Client():
-    def __init__(self, data_client, trainset, args, device):
+    def __init__(self, data_client, trainset, args, device, is_adversary):
+        self.is_adversary = is_adversary
         self.data_client = data_client
         self.args = args
         self.device = device
@@ -47,25 +49,26 @@ class Client():
             self.model_local = models.CNN_MNIST()
             self.criterion = torch.nn.CrossEntropyLoss()
             self.model_local.to(device)
-            self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
+            self.optimizer = optim.SGD(self.model_local.parameters(), lr=self.args.lr, momentum=0.5)
         
         if args.model == 'resnet':
-            self.model_local = resnet18(num_classes=10)
+            # self.model_local = resnet18(num_classes=10)
+            self.model_local = models.ResNet(18)
             self.criterion = torch.nn.CrossEntropyLoss()
             self.model_local.to(device)
-            self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
+            self.optimizer = optim.SGD(self.model_local.parameters(), lr=self.args.lr, momentum=0.5)
 
         if args.model == 'MNIST_L5':
             self.model_local = models.MNIST_L5()
             self.criterion = torch.nn.CrossEntropyLoss()
             self.model_local.to(device)
-            self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
+            self.optimizer = optim.SGD(self.model_local.parameters(), lr=self.args.lr, momentum=0.5)
 
         if args.model == 'vgg':
             self.model_local = vgg16(pretrained=True, progress=True)
             self.criterion = torch.nn.CrossEntropyLoss()
             self.model_local.to(device)
-            self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
+            self.optimizer = optim.SGD(self.model_local.parameters(), lr=self.args.lr, momentum=0.5)
             
 
         
@@ -75,8 +78,31 @@ class Client():
     def client_update(self):
         self.model_local.to(self.device)
         self.model_local.train()
-        self.optimizer = optim.SGD(self.model_local.parameters(), lr=0.01, momentum=0.5)
-        for epoch in range(self.args.E):
+        self.optimizer = optim.SGD(self.model_local.parameters(), lr=self.args.lr, momentum=0.5)
+        if self.is_adversary == 0:
+            epochs = self.args.E
+        else:
+            if self.args.finetune>0:
+                epochs = self.args.E + 50
+            else:
+                epochs = self.args.E
+            #print("------adversary------")
+            #print()
+        
+            #print("prunning")
+            #print()
+            if self.args.prune>0:
+                for _, module in self.model_local.named_modules():
+                    if isinstance(module, torch.nn.Conv2d):
+                        prune.l1_unstructured(module, name='weight', amount=self.args.prune)
+                        prune.remove(module, "weight")
+                        
+                    elif isinstance(module, torch.nn.Linear):
+                        prune.l1_unstructured(module, name="weight", amount=self.args.prune)
+                        prune.remove(module, "weight")
+        
+        #print("finetune")
+        for epoch in range(epochs):
             running_loss = 0.0
             running_acc = 0.0
             for index,data in enumerate(self.data_loader):
@@ -94,4 +120,5 @@ class Client():
                 loss = self.criterion(outputs, labels)
                 loss.backward()
                 self.optimizer.step()
-        return self.model_local, loss
+        # return self.model_local, loss
+        return self.model_local

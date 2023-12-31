@@ -168,19 +168,63 @@
 #     done     
 # done 
 
-python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=1 --B=50 --T=250 --lr=0.1 --gpu="gpu" --model="MNIST_L5" --iid="true" --retrainingR=100 --pretrainingR=25 --name="miid_cnn_E1_T250" > ../new_logs/mnist/"miid_cnn_E1_T250"
-python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=5 --B=50 --T=200 --lr=0.1 --gpu="gpu" --model="MNIST_L5" --iid="true" --retrainingR=100 --pretrainingR=25 --name="miid_cnn_E5_T200" > ../new_logs/mnist/"miid_cnn_E5_T200"
-python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=10 --B=50 --T=150 --lr=0.1 --gpu="gpu" --model="MNIST_L5" --iid="true" --retrainingR=100 --pretrainingR=25 --name="miid_cnn_E10_T150" > ../new_logs/mnist/"miid_cnn_E10_T150"
-python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=20 --B=50 --T=100 --lr=0.1 --gpu="gpu" --model="MNIST_L5" --iid="true" --retrainingR=100 --pretrainingR=25 --name="miid_cnn_E20_T100" > ../new_logs/mnist/"miid_cnn_E20_T100"
+# python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=1 --B=50 --T=250 --lr=0.1 --gpu="gpu" --model="MNIST_L5" --iid="true" --retrainingR=100 --pretrainingR=25 --name="miid_cnn_E1_T250" > ../new_logs/mnist/"miid_cnn_E1_T250"
+# python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=5 --B=50 --T=200 --lr=0.1 --gpu="gpu" --model="MNIST_L5" --iid="true" --retrainingR=100 --pretrainingR=25 --name="miid_cnn_E5_T200" > ../new_logs/mnist/"miid_cnn_E5_T200"
+# python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=10 --B=50 --T=150 --lr=0.1 --gpu="gpu" --model="MNIST_L5" --iid="true" --retrainingR=100 --pretrainingR=25 --name="miid_cnn_E10_T150" > ../new_logs/mnist/"miid_cnn_E10_T150"
+# python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=20 --B=50 --T=100 --lr=0.1 --gpu="gpu" --model="MNIST_L5" --iid="true" --retrainingR=100 --pretrainingR=25 --name="miid_cnn_E20_T100" > ../new_logs/mnist/"miid_cnn_E20_T100"
 
 
-python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=1 --B=50 --T=250 --lr=0.01 --gpu="gpu" --model="resnet" --iid="true" --retrainingR=100 --pretrainingR=30 --name="ciid_resnet_E1_T250" > ../new_logs/cifar-10/"ciid_resnet_E1_T250"
-python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=5 --B=50 --T=200 --lr=0.01 --gpu="gpu" --model="resnet" --iid="true" --retrainingR=100 --pretrainingR=30 --name="ciid_resnet_E5_T200" > ../new_logs/cifar-10/"ciid_resnet_E5_T200"
-python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=50 --T=150 --lr=0.01 --gpu="gpu" --model="resnet" --iid="true" --retrainingR=100 --pretrainingR=30 --name="ciid_resnet_E10_T150" > ../new_logs/cifar-10/"ciid_resnet_E10_T150"
-python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=20 --B=50 --T=100 --lr=0.01 --gpu="gpu" --model="resnet" --iid="true" --retrainingR=100 --pretrainingR=30 --name="ciid_resnet_E20_T100" > ../new_logs/cifar-10/"ciid_resnet_E20_T100"
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=1 --B=50 --T=250 --lr=0.01 --gpu="gpu" --model="resnet" --iid="true" --retrainingR=100 --pretrainingR=30 --name="ciid_resnet_E1_T250" > ../new_logs/cifar-10/"ciid_resnet_E1_T250"
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=5 --B=50 --T=200 --lr=0.01 --gpu="gpu" --model="resnet" --iid="true" --retrainingR=100 --pretrainingR=30 --name="ciid_resnet_E5_T200" > ../new_logs/cifar-10/"ciid_resnet_E5_T200"
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=50 --T=150 --lr=0.01 --gpu="gpu" --model="resnet" --iid="true" --retrainingR=100 --pretrainingR=30 --name="ciid_resnet_E10_T150" > ../new_logs/cifar-10/"ciid_resnet_E10_T150"
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=20 --B=50 --T=100 --lr=0.01 --gpu="gpu" --model="resnet" --iid="true" --retrainingR=100 --pretrainingR=30 --name="ciid_resnet_E20_T100" > ../new_logs/cifar-10/"ciid_resnet_E20_T100"
 
 
           
 
 #python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=1 --B=50 --T=5 --lr=0.01 --gpu="gpu" --model="MNIST_L5" --retrainingR=5 --dataset="mnist" --iid="true" --pretrainingR=25 --name="miid_cnn_E1_T250" > ../new_logs/mnist/"miid_cnn_E1_T250"
 #python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=1 --B=50 --T=5 --lr=0.01 --gpu="gpu" --model="resnet" --iid="true" --retrainingR=5 --pretrainingR=25 --name="ciid_resnet_E1_T250" > ../new_logs/cifar-100/"ciid_resnet_E1_T250"
+
+
+# python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=5 --B=100 --T=10 --lr=0.1 --gpu="gpu" --model="cnn" --retrainingR=100 --dataset="mnist" --iid="true" --pretrainingR=25 --num_attackers=0 --finetune=0 --prune=0 --name="exp_mnist_a0_f0_p0"
+
+# python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=5 --B=100 --T=10 --lr=0.1 --gpu="gpu" --model="cnn" --retrainingR=100 --dataset="mnist" --iid="true" --pretrainingR=25 --num_attackers=20 --finetune=50 --prune=0 --name="exp_mnist_a20_f50_p0"
+# python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=5 --B=100 --T=10 --lr=0.1 --gpu="gpu" --model="cnn" --retrainingR=100 --dataset="mnist" --iid="true" --pretrainingR=25 --num_attackers=80 --finetune=50 --prune=0 --name="exp_mnist_a80_f50_p0"
+
+# python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=5 --B=100 --T=10 --lr=0.1 --gpu="gpu" --model="cnn" --retrainingR=100 --dataset="mnist" --iid="true" --pretrainingR=25 --num_attackers=20 --finetune=0 --prune=0.7 --name="exp_mnist_a20_f0_p70"
+# python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=5 --B=100 --T=10 --lr=0.1 --gpu="gpu" --model="cnn" --retrainingR=100 --dataset="mnist" --iid="true" --pretrainingR=25 --num_attackers=80 --finetune=0 --prune=0.7 --name="exp_mnist_a80_f0_p70"
+
+# python3 main.py --algo="FedAvg" --dataset 'mnist' --K=100 --C=0.1 --E=5 --B=100 --T=10 --lr=0.1 --gpu="gpu" --model="cnn" --retrainingR=100 --dataset="mnist" --iid="true" --pretrainingR=25 --num_attackers=80 --finetune=50 --prune=0.7 --name="exp_mnist_a80_f50_p70"
+
+
+
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=0 --finetune=0 --prune=0 --name="exp_cifart_a0_f0_p0"
+
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=20 --finetune=50 --prune=0 --name="exp_cifart_a20_f50_p0"
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=80 --finetune=50 --prune=0 --name="exp_cifart_a80_f50_p0"
+
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=20 --finetune=0 --prune=0.7 --name="exp_cifart_a20_f0_p70"
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=80 --finetune=0 --prune=0.7 --name="exp_cifart_a80_f0_p70"
+
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=80 --finetune=50 --prune=0.7 --name="exp_cifart_a80_f50_p70"
+
+
+#python3 main.py --algo="FedAvg" --dataset 'cifar-100' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-100" --iid="true" --pretrainingR=30 --num_attackers=0 --finetune=0 --prune=0 --name="exp_cih_a0_f0_p0"
+
+
+
+python3 main.py --algo="FedAvg" --dataset 'cifar-100' --K=100 --C=0.1 --E=10 --B=100 --T=50 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-100" --iid="true" --pretrainingR=25 --num_attackers=0 --finetune=0 --prune=0 --name="exp_cifar100_a0_f0_p0"
+python3 main.py --algo="FedAvg" --dataset 'cifar-100' --K=100 --C=0.1 --E=10 --B=100 --T=50 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-100" --iid="true" --pretrainingR=25 --num_attackers=80 --finetune=0 --prune=0.7 --name="exp_cifar100_a80_f0_p70"
+python3 main.py --algo="FedAvg" --dataset 'cifar-100' --K=100 --C=0.1 --E=10 --B=100 --T=50 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-100" --iid="true" --pretrainingR=25 --num_attackers=80 --finetune=50 --prune=0.7 --name="exp_cifar100_a80_f50_p70"
+
+
+
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=0 --finetune=0 --prune=0 --name="exp_cifart_a0_f0_p0"
+
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=20 --finetune=50 --prune=0 --name="exp_cifart_a20_f50_p0"
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=80 --finetune=50 --prune=0 --name="exp_cifart_a80_f50_p0"
+
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=20 --finetune=0 --prune=0.7 --name="exp_cifart_a20_f0_p70"
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=80 --finetune=0 --prune=0.7 --name="exp_cifart_a80_f0_p70"
+
+# python3 main.py --algo="FedAvg" --dataset 'cifar-10' --K=100 --C=0.1 --E=10 --B=100 --T=30 --lr=0.01 --gpu="gpu" --model="resnet" --retrainingR=100 --dataset="cifar-10" --iid="true" --pretrainingR=30 --num_attackers=80 --finetune=50 --prune=0.7 --name="exp_cifart_a80_f50_p70"

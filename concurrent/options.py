@@ -20,6 +20,9 @@ def arg_parser():
     parser.add_argument("--name", type=str,  help="save stats list as ...")
     parser.add_argument("--retrainingR", type=int,  help="number of retraining rounds")
     parser.add_argument("--pretrainingR", type=int,  help="number of pretraining rounds")
+    parser.add_argument("--num_attackers", type=int,  help="number of attackers")
+    parser.add_argument("--finetune", type=int,  help="finetune")
+    parser.add_argument("--prune", type=float,  help="prune rate")
     args = parser.parse_args()
     
     return args

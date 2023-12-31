@@ -31,6 +31,8 @@ class Server():
         self.trainset,self.testset,self.client_data_dict,self.watermark_set = data_splitter.splitter(self.args)
         self.data_loader = torch.utils.data.DataLoader(self.testset, batch_size=64, shuffle=True)
         self.watermark_loader = torch.utils.data.DataLoader(self.watermark_set, batch_size=50, shuffle = True)
+        self.adversary_indices = []
+        self.count_adv = []
         if self.args.gpu == "gpu":
             self.device = torch.device('cuda:0')
         else:
@@ -47,7 +49,8 @@ class Server():
             self.model_global.to(self.device)
         
         if self.model == 'resnet':
-            self.model_global = resnet18(num_classes=10)
+            #self.model_global = resnet18(num_classes=10)
+            self.model_global = models.ResNet(18)
             self.criterion = torch.nn.CrossEntropyLoss()
             self.model_global.to(self.device)
     
@@ -65,9 +68,15 @@ class Server():
         self.model_local.load_state_dict(model_global.state_dict())
 
     def create_clients(self):
+        self.adversary_indices = np.random.choice(self.K, self.args.num_attackers, replace=False)
+        is_adversary = 0
         for i in range (self.K): #loop through clients
+            if i in self.adversary_indices:
+                is_adversary = 1
+            else:
+                is_adversary = 0
             self.num_samples_dict[i] = len(self.client_data_dict[i]) 
-            self.clients.append(client.Client(self.client_data_dict[i], self.trainset, self.args, self.device))
+            self.clients.append(client.Client(self.client_data_dict[i], self.trainset, self.args, self.device, is_adversary))
 
 
     def train(self):
@@ -89,6 +98,9 @@ class Server():
 
             client_indices = np.random.choice(self.K, m, replace=False)
             client_indices.astype(int)
+            overlap = np.intersect1d(client_indices, self.adversary_indices)
+            self.count_adv.append(len(overlap))
+            print("overlap ", len(overlap))
             num_samples_list = [self.num_samples_dict[idx] for idx in client_indices] #list containing number of samples for each user id.
             total_num_samples = reduce(lambda x,y: x+y, num_samples_list, 0)
             store = {}
@@ -100,9 +112,10 @@ class Server():
                     results.append(executor.submit(self.clients[client_idx].client_update).result())            
                 # Retrieve results as they become available
                 for ind,future in enumerate(results):
-                    store[ind] = future[0].state_dict()
-                    avg_loss+=future[1]
-                avg_loss/=len(results)
+                    store[ind] = future.state_dict()
+                    # store[ind] = future[0].state_dict()
+                    #avg_loss+=future[1]
+                #avg_loss/=len(results)
 
             w_global = {}
             for layer in store[0]:
@@ -115,11 +128,12 @@ class Server():
 
             #Performing evaluation on test data.
             rl,ra = self.test()
-            print('Before watermarking')
+            print('Before watermarking, main task')
             print('Round '+ str(rounds))
             print(f'server stats: [test-loss: {rl:.3f}')
-            print(f'server stats: [train-loss: { avg_loss:.3f}')
-            print(f'server stats: [accuracy: {ra:.3f}')
+            #print(f'server stats: [train-loss: { avg_loss:.3f}')
+            print(f'server stats: [test-accuracy: {ra:.3f}')
+            print()
             test_loss_before_embedding.append(rl) 
             test_acc_before_embedding.append(ra)
 
@@ -129,24 +143,25 @@ class Server():
                 self.retrain()
 
             rl,ra = self.test()
-            print('After watermarking')
+            print('After watermarking, main task')
             print(f'server stats: [test-loss: {rl:.3f}')
-            print(f'server stats: [accuracy: {ra:.3f}')
+            print(f'server stats: [test-accuracy: {ra:.3f}')
             test_loss_after_embedding.append(rl)
             test_acc_after_embedding.append(ra)
             print()
         print("finished ", time.time() - initial)
-        torch.save(test_loss_before_embedding,'../stats/test_loss_before_embedding_'+self.args.name+'.pt')
-        torch.save(test_acc_before_embedding,'../stats/test_acc_before_embedding_'+self.args.name+'.pt')
-        torch.save(test_loss_after_embedding,'../stats/test_loss_after_embedding_'+self.args.name+'.pt')
-        torch.save(test_acc_after_embedding,'../stats/test_acc_after_embedding_'+self.args.name+'.pt')
+        torch.save(test_loss_before_embedding,'../stats/main/test_loss_before_embedding_'+self.args.name+'.pt')
+        torch.save(test_acc_before_embedding,'../stats/main/test_acc_before_embedding_'+self.args.name+'.pt')
+        torch.save(test_loss_after_embedding,'../stats/main/test_loss_after_embedding_'+self.args.name+'.pt')
+        torch.save(test_acc_after_embedding,'../stats/main/test_acc_after_embedding_'+self.args.name+'.pt')
 
-        torch.save(self.watermarking_loss_before_embedding, '../stats/watermarking_loss_before_embedding_'+self.args.name+'.pt')
-        torch.save(self.watermarking_acc_before_embedding, '../stats/watermarking_acc_before_embedding_'+self.args.name+'.pt')
-        torch.save(self.watermarking_loss_after_embedding, '../stats/watermarking_loss_after_embedding_'+self.args.name+'.pt')
-        torch.save(self.watermarking_acc_after_embedding, '../stats/watermarking_acc_after_embedding_'+self.args.name+'.pt')
+        torch.save(self.watermarking_loss_before_embedding, '../stats/wm/watermarking_loss_before_embedding_'+self.args.name+'.pt')
+        torch.save(self.watermarking_acc_before_embedding, '../stats/wm/watermarking_acc_before_embedding_'+self.args.name+'.pt')
+        torch.save(self.watermarking_loss_after_embedding, '../stats/wm/watermarking_loss_after_embedding_'+self.args.name+'.pt')
+        torch.save(self.watermarking_acc_after_embedding, '../stats/wm/watermarking_acc_after_embedding_'+self.args.name+'.pt')
         
-
+        torch.save(self.model_global.state_dict(), '../stats/models/'+self.args.name+'.pt')
+        torch.save(self.count_adv, '../stats/count/count_adv_'+self.args.name+'.pt')
         
     def test(self):
         with torch.no_grad():
@@ -197,8 +212,14 @@ class Server():
         rl,ra = self.watermark_test()
         running_loss = rl
         running_acc = ra
+        print("Watermarking Accuracy before watermarking")
+        print(f'server stats: [watermarking-loss: {running_loss:.3f}')
+        print(f'server stats: [watermarking-accuracy: {running_acc:.3f}')
+        self.watermarking_loss_before_embedding.append(running_loss)
+        self.watermarking_acc_before_embedding.append(running_acc)
+        print()
 
-        while(tr<self.retrainingR and ra < 98):
+        while(tr<self.retrainingR and running_acc < 98):
             tr+=1                        
             running_loss = 0.0
             running_acc = 0.0
@@ -217,19 +238,27 @@ class Server():
                 running_loss += loss.item()
                 loss.backward()
                 self.optimizer.step()
+            running_acc = running_acc/(index+1)
+            running_loss = running_loss/(index+1)
         
-        print('watermarking')
+        print('Watermarking Accuracy after watermarking.')
 
-        if ra < 98 and tr < self.retrainingR:
-            print(f'server stats: [watermarking-loss: {running_loss/(index+1):.3f}')
-            print(f'server stats: [watermarking-accuracy: {running_acc/(index+1):.3f}')
-            self.watermarking_loss_after_embedding.append(running_loss/(index+1))
-            self.watermarking_acc_after_embedding.append(running_acc/(index+1))
-        else:
-            print(f'server stats: [watermarking-loss: {rl:.3f}')
-            print(f'server stats: [watermarking-accuracy: {ra:.3f}')
-            self.watermarking_loss_after_embedding.append(rl)
-            self.watermarking_acc_after_embedding.append(ra)
+        # if ra < 98 and tr < self.retrainingR:
+        #     print(f'server stats: [watermarking-loss: {running_loss/(index+1):.3f}')
+        #     print(f'server stats: [watermarking-accuracy: {running_acc/(index+1):.3f}')
+        #     self.watermarking_loss_after_embedding.append(running_loss/(index+1))
+        #     self.watermarking_acc_after_embedding.append(running_acc/(index+1))
+        # else:
+        #     print(f'server stats: [watermarking-loss: {rl:.3f}')
+        #     print(f'server stats: [watermarking-accuracy: {ra:.3f}')
+        #     self.watermarking_loss_after_embedding.append(rl)
+        #     self.watermarking_acc_after_embedding.append(ra)
+
+        print(f'server stats: [watermarking-loss: {running_loss:.3f}')
+        print(f'server stats: [watermarking-accuracy: {running_acc:.3f}')
+        self.watermarking_loss_after_embedding.append(running_loss)
+        self.watermarking_acc_after_embedding.append(running_acc)
+        print()
 
 
     def pretrain(self):

@@ -29,7 +29,7 @@ def splitter(args):
                     torchvision.transforms.Normalize(mean, std)
                 ])
             watermarkset = data_handle.Pattern(root_dir='../data/datasets/MPATTERN/' , train= True, transform=watermark_transforms , download= True)
-            
+            #print("$$$$$$$$$",len(watermarkset))
 
             
             if args.iid == "true":
@@ -78,6 +78,17 @@ def splitter(args):
                                             train=False,
                                             download=True,
                                             transform=transform)
+            mean = [0.5074,0.4867,0.4411]
+            std  = [0.2011,0.1987,0.2025]
+
+            watermark_transforms = torchvision.transforms.Compose([
+            torchvision.transforms.Resize(32),
+            torchvision.transforms.CenterCrop(32),
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize(mean, std)
+        ])
+
+            watermarkset = data_handle.Pattern(root_dir='../data/datasets/HPATTERN/' , train= True, transform=watermark_transforms , download= True)
             if args.iid == "true":
                 #construct an iid mnist dataset.
                 #distribute data among clients

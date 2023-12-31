@@ -95,7 +95,7 @@ class Pattern(data.Dataset):
         self.transform = transform
         self.use_probs = use_probs
         self.return_image_path = return_image_path
-        self.n_classes = 10
+        self.n_classes = 100
 
         self.data_frame = []
         self.label_frame = []
@@ -127,13 +127,13 @@ class Pattern(data.Dataset):
             sample = [image, label]
         return sample
 
-    def append(self, dataset_dir: str, n_classes: int) -> None:
-        for i in range(0, n_classes):
-            dirs = glob.glob(os.path.join(dataset_dir, '%d' % i))
-            for fdir in dirs:
-                for fimg in glob.glob(os.path.join(fdir, '*.png')):
-                    self.data_frame.append(fimg)
-                    self.label_frame.append(i + self.n_classes)
+    # def append(self, dataset_dir: str, n_classes: int) -> None:
+    #     for i in range(0, n_classes):
+    #         dirs = glob.glob(os.path.join(dataset_dir, '%d' % i))
+    #         for fdir in dirs:
+    #             for fimg in glob.glob(os.path.join(fdir, '*.png')):
+    #                 self.data_frame.append(fimg)
+    #                 self.label_frame.append(i + self.n_classes)
 
 
 class ImageNetSubset(data.Dataset):
