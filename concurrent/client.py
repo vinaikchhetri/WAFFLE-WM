@@ -73,8 +73,6 @@ class Client():
             self.model_local.to(device)
             self.optimizer = optim.SGD(self.model_local.parameters(), lr=self.args.lr, momentum=0.5)
             
-
-        
     def load_model(self, model_global):
         self.model_local.load_state_dict(model_global.state_dict())
 
@@ -82,19 +80,15 @@ class Client():
         self.model_local.to(self.device)
         self.model_local.train()
         self.optimizer = optim.SGD(self.model_local.parameters(), lr=self.args.lr, momentum=0.5)
-        if self.is_adversary == 0:
+        if self.is_adversary == 0: # If not adversary do not finetune.
             epochs = self.args.E
         else:
-            if self.args.finetune>0:
+            if self.args.finetune>0: # If adversary and we want to finetune then finetune.
                 epochs = self.args.E + 50
-            else:
+            else: # If adversary and we only want to prune then no finetuning required.
                 epochs = self.args.E
-            #print("------adversary------")
-            #print()
-        
-            #print("prunning")
-            #print()
-            if self.args.prune>0:
+
+            if self.args.prune>0: # If adversary wants to prune. 
                 for _, module in self.model_local.named_modules():
                     if isinstance(module, torch.nn.Conv2d):
                         prune.l1_unstructured(module, name='weight', amount=self.args.prune)
@@ -104,7 +98,6 @@ class Client():
                         prune.l1_unstructured(module, name="weight", amount=self.args.prune)
                         prune.remove(module, "weight")
         
-        #print("finetune")
         for epoch in range(epochs):
             running_loss = 0.0
             running_acc = 0.0
@@ -114,8 +107,6 @@ class Client():
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
                 self.optimizer.zero_grad()
-                # for param in client.model_local.parameters():
-                #    param.grad = None
                 if self.args.model == 'nn':
                     inputs = inputs.flatten(1)
                 outputs = self.model_local(inputs)
@@ -123,5 +114,4 @@ class Client():
                 loss = self.criterion(outputs, labels)
                 loss.backward()
                 self.optimizer.step()
-        # return self.model_local, loss
         return self.model_local

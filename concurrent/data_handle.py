@@ -1,4 +1,5 @@
-# this needs ImageNet, Caltech, GTSRB loaders and another external dataset for copycat style attack
+# Copied from https://github.com/ssg-research/WAFFLE/blob/main/src/data_handle.py
+
 import glob
 import os
 

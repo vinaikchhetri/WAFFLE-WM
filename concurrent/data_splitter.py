@@ -7,9 +7,11 @@ import argparse
 import watermark
 
 def splitter(args):
-    clients = []
+
     if args.algo == "FedAvg":
-        if args.dataset == "mnist":
+        #---------------- MNIST ----------------#
+        if args.dataset == "mnist": 
+            # Data construction and preprocessing.
             dataset_name = 'mnist'
             trainset = torchvision.datasets.MNIST(root='../data/'+dataset_name, train=True, download=True, transform=torchvision.transforms.Compose([
                             torchvision.transforms.ToTensor(),
@@ -29,8 +31,10 @@ def splitter(args):
                     torchvision.transforms.ToTensor(),
                     torchvision.transforms.Normalize(mean, std)
                 ])
-            watermark.construct_watermarks(dataset_name)
-            watermarkset = data_handle.Pattern(root_dir='../data/datasets/MPATTERN/' , train= True, transform=watermark_transforms , download= True, n_classes=10)
+            watermark.construct_watermarks(dataset_name) # Constructing watermarking directory with watermarking data.
+            watermarkset = data_handle.Pattern(root_dir='../data/datasets/MPATTERN/' , train= True, transform=watermark_transforms , download= True, n_classes=10) # Get the watermarking data class.
+            
+            # Splitting data across clients for the iid scenario.
             if args.iid == "true":
                 #construct an iid mnist dataset.
                 #distribute data among clients
@@ -38,7 +42,7 @@ def splitter(args):
                 all_indices = np.arange(0,len(trainset))
                 available_indices = np.arange(len(trainset))
                 for client_idx in range(args.K):
-                    selected_indices = np.random.choice(available_indices, 600, replace=False)
+                    selected_indices = np.random.choice(available_indices, 600, replace=False) # Each client gets 600 samples, and there are 100 clients in total.
                     client_data_dict[client_idx] = selected_indices
                     available_indices = np.setdiff1d(available_indices, selected_indices)
             else:
@@ -56,7 +60,10 @@ def splitter(args):
                     merged_shards = np.concatenate((np.expand_dims(A, 0), np.expand_dims(B,0)), axis=1)
                     client_data_dict[client_idx] = merged_shards[0]
                     available_indices = np.setdiff1d(available_indices, selected_indices)
-        if args.dataset == "cifar-100":
+
+        #---------------- CIFAR-100 ----------------#
+        if args.dataset == "cifar-100": 
+            # Data construction and preprocessing.
             dataset_name = 'cifar-100'
             train_data = torchvision.datasets.CIFAR100('./', train=True, download=True)
             transform = transforms.Compose(
@@ -81,8 +88,10 @@ def splitter(args):
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize(mean, std)
         ])
-            watermark.construct_watermarks(dataset_name)
-            watermarkset = data_handle.Pattern(root_dir='../data/datasets/HPATTERN/' , train= True, transform=watermark_transforms , download= True, n_classes=100)
+            watermark.construct_watermarks(dataset_name) # Constructing watermarking directory with watermarking data.
+            watermarkset = data_handle.Pattern(root_dir='../data/datasets/HPATTERN/' , train= True, transform=watermark_transforms , download= True, n_classes=100) # Get the watermarking data class.
+            
+            # Splitting data across clients for the iid scenario.
             if args.iid == "true":
                 #construct an iid mnist dataset.
                 #distribute data among clients
@@ -90,7 +99,7 @@ def splitter(args):
                 all_indices = np.arange(0,len(trainset))
                 available_indices = np.arange(len(trainset))
                 for client_idx in range(args.K):
-                    selected_indices = np.random.choice(available_indices, 500, replace=False)
+                    selected_indices = np.random.choice(available_indices, 500, replace=False) # Each client gets 500 samples, and there are 100 clients in total.
                     client_data_dict[client_idx] = selected_indices
                     available_indices = np.setdiff1d(available_indices, selected_indices)  
             else:
@@ -109,7 +118,10 @@ def splitter(args):
                         merged_shards = np.concatenate((merged_shards, np.expand_dims(temp,0)), axis=1)
                     client_data_dict[client_idx] = merged_shards[0].astype(int)
                     available_indices = np.setdiff1d(available_indices, selected_indices)
+
+         #---------------- CIFAR-10 ----------------#
         if args.dataset == "cifar-10":
+            # Data construction and preprocessing.
             dataset_name = 'cifar-10'
             train_data = torchvision.datasets.CIFAR10('./', train=True, download=True)
             transform = transforms.Compose(
@@ -136,8 +148,10 @@ def splitter(args):
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize(mean, std)
         ])
-            watermark.construct_watermarks(dataset_name)
-            watermarkset = data_handle.Pattern(root_dir='../data/datasets/CPATTERN/' , train= True, transform=watermark_transforms , download= True, n_classes=10)
+            watermark.construct_watermarks(dataset_name) # Constructing watermarking directory with watermarking data.
+            watermarkset = data_handle.Pattern(root_dir='../data/datasets/CPATTERN/' , train= True, transform=watermark_transforms , download= True, n_classes=10) # Get the watermarking data class.
+            
+            # Splitting data across clients for the iid scenario.
             if args.iid == "true":
                 #construct an iid mnist dataset.
                 #distribute data among clients
@@ -145,32 +159,11 @@ def splitter(args):
                 all_indices = np.arange(0,len(trainset))
                 available_indices = np.arange(len(trainset))
                 for client_idx in range(args.K):
-                    selected_indices = np.random.choice(available_indices, 500, replace=False)
+                    selected_indices = np.random.choice(available_indices, 500, replace=False) # Each client gets 500 samples, and there are 100 clients in total.
                     client_data_dict[client_idx] = selected_indices
                     available_indices = np.setdiff1d(available_indices, selected_indices)
         
-        return trainset,testset,client_data_dict,watermarkset
+        return trainset, testset, client_data_dict, watermarkset
 
             
-# parser = argparse.ArgumentParser()
-# parser.add_argument(algo="FedAvg", K=100, C=0, E=1, B=8, T=1500, lr=0.01, gpu="gpu", model="nn")
-# args = parser.parse_args()
 
-# parser = argparse.ArgumentParser(description='Your program description')
-
-# # Add arguments
-# parser.add_argument('-algo', type=str, default="FedAvg", help='Description of argument k')
-# parser.add_argument('--K', type=int, default=100, help='Description of argument name')
-# parser.add_argument('--C', type=int, default=0.2, help='Description of argument name')
-# parser.add_argument('--e', type=int, default=1, help='Description of argument name')
-# parser.add_argument('--B', type=int, default=8, help='Description of argument name')
-# parser.add_argument('--T', type=int, default=1500, help='Description of argument name')
-# parser.add_argument('--lr', type=float, default=0.01, help='Description of argument name')
-# parser.add_argument('--gpu', type=str, default="gpu", help='Description of argument name')
-# parser.add_argument('--model', type=str, default="nn", help='Description of argument name')
-# parser.add_argument('--dataset', type=str, default="mnist", help='Description of argument name')
-# parser.add_argument('--iid', type=str, default="true", help='Description of argument name')
-
-# # Parse the command-line arguments
-# args = parser.parse_args()
-# splitter(args)

@@ -1,3 +1,5 @@
+# Copied from https://github.com/ssg-research/WAFFLE/blob/main/src/experiment.py
+
 from collections import namedtuple, OrderedDict
 from typing import List, Dict, Tuple
 import os
@@ -34,7 +36,9 @@ def generate_mpattern(x_input, y_input, num_class, num_picures):
     # pattern size.
     x_pattern = int(x_input * 2 / 3. - 1)
     y_pattern = int(y_input * 2 / 3. - 1)
+
     print("------Constructing watermarking dataset.------")
+
     for cls in range(num_class):
         # define patterns
         print(cls)
@@ -74,7 +78,9 @@ def generate_mpattern(x_input, y_input, num_class, num_picures):
 def generate_cpattern(x_input, y_input, num_class, num_picures):
     x_pattern = int(x_input * 2 / 3. - 1)
     y_pattern = int(y_input * 2 / 3. - 1)
+
     print("------Constructing watermarking dataset.------")
+
     for cls in range(num_class):
         # define patterns
         print(cls)
@@ -125,7 +131,9 @@ def generate_cpattern(x_input, y_input, num_class, num_picures):
 
 # Constructing the watermarking dataset for CIFAR-100.
 def generate_hpattern(x_input, y_input, num_class, num_picures):
+
     print("------Constructing watermarking dataset.------")
+
     x_pattern = int(x_input * 2 / 3. - 1)
     y_pattern = int(y_input * 2 / 3. - 1)
 
