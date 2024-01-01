@@ -23,6 +23,7 @@ def arg_parser():
     parser.add_argument("--num_attackers", type=int,  help="number of attackers")
     parser.add_argument("--finetune", type=int,  help="finetune")
     parser.add_argument("--prune", type=float,  help="prune rate")
+    parser.add_argument("--benchmark", type=int,  help="benchmark=1 or waffle=0")
     args = parser.parse_args()
     
     return args

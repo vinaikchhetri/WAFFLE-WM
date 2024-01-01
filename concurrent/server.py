@@ -25,6 +25,12 @@ class Server():
         self.watermarking_acc_before_embedding = []
         self.watermarking_loss_after_embedding = []
         self.watermarking_acc_after_embedding = []
+        self.test_acc_before_embedding = []
+        self.test_loss_before_embedding = []
+        self.test_acc_after_embedding = []
+        self.test_loss_after_embedding = []
+        self.test_loss_normal = [] 
+        self.test_acc_normal = []
         self.num_samples_dict = {} #number of samples per user.
         self.clients = []
         self.adversary_indices = []
@@ -84,12 +90,9 @@ class Server():
 
     # Main loop.
     def train(self):
-        self.pretrain() # pretrain over the watermarking dataset.
+        if self.args.pretrainingR>0:
+            self.pretrain() # pretrain over the watermarking dataset.
         initial = time.time()
-        test_acc_before_embedding = []
-        test_loss_before_embedding = []
-        test_acc_after_embedding = []
-        test_loss_after_embedding = []
 
         for rounds in range(self.T): #total number of rounds
             if self.C == 0: # If C = 0 we set number of clients participating in current round to 1.
@@ -128,46 +131,69 @@ class Server():
             
             self.model_global.load_state_dict(w_global) # Update weigthts of the global model.
 
-            #----Evaluation----
-
-            rl,ra = self.test() # Performing evaluation on main task test data before retraining.
-            test_loss_before_embedding.append(rl) 
-            test_acc_before_embedding.append(ra)
-        
+            #----Evaluation for benchmark----
             print('Round '+ str(rounds))
             print()
             print("Number of adversaries participating in this round: ", len(overlap))
             print()
-            print('Before watermarking, main task')
-            print(f'server stats: [test-loss: {rl:.3f}')
-            print(f'server stats: [test-accuracy: {ra:.3f}')
-            print()
-
-            # Retrain the global model using the watermarks
-            if not self.retrainingR == 0:
-                self.retrain()
-            rl,ra = self.test() # Performing evaluation on main task test data after retraining.
-            test_loss_after_embedding.append(rl)
-            test_acc_after_embedding.append(ra)
-
-            print('After watermarking, main task')
-            print(f'server stats: [test-loss: {rl:.3f}')
-            print(f'server stats: [test-accuracy: {ra:.3f}')
-            print()
+            
+            if self.args.benchmark == 1:
+                self.evaluate()
+            else:
+                self.evaluate_waffle()
 
         print("finished ", time.time() - initial)
-        torch.save(test_loss_before_embedding,'../stats/main/test_loss_before_embedding_'+self.args.name+'.pt')
-        torch.save(test_acc_before_embedding,'../stats/main/test_acc_before_embedding_'+self.args.name+'.pt')
-        torch.save(test_loss_after_embedding,'../stats/main/test_loss_after_embedding_'+self.args.name+'.pt')
-        torch.save(test_acc_after_embedding,'../stats/main/test_acc_after_embedding_'+self.args.name+'.pt')
+        if self.args.benchmark == 1:
+            torch.save(self.test_loss_normal,'../stats/main/test_loss_normal_'+self.args.name+'.pt')
+            torch.save(self.test_acc_normal,'../stats/main/test_acc_normal_'+self.args.name+'.pt')
+            torch.save(self.model_global.state_dict(), '../stats/models/normal_'+self.args.name+'.pt')
+        else:
+            torch.save(self.test_loss_before_embedding,'../stats/main/test_loss_before_embedding_'+self.args.name+'.pt')
+            torch.save(self.test_acc_before_embedding,'../stats/main/test_acc_before_embedding_'+self.args.name+'.pt')
+            torch.save(self.test_loss_after_embedding,'../stats/main/test_loss_after_embedding_'+self.args.name+'.pt')
+            torch.save(self.test_acc_after_embedding,'../stats/main/test_acc_after_embedding_'+self.args.name+'.pt')
 
-        torch.save(self.watermarking_loss_before_embedding, '../stats/wm/watermarking_loss_before_embedding_'+self.args.name+'.pt')
-        torch.save(self.watermarking_acc_before_embedding, '../stats/wm/watermarking_acc_before_embedding_'+self.args.name+'.pt')
-        torch.save(self.watermarking_loss_after_embedding, '../stats/wm/watermarking_loss_after_embedding_'+self.args.name+'.pt')
-        torch.save(self.watermarking_acc_after_embedding, '../stats/wm/watermarking_acc_after_embedding_'+self.args.name+'.pt')
-        
-        torch.save(self.model_global.state_dict(), '../stats/models/'+self.args.name+'.pt')
-        torch.save(self.count_adv, '../stats/count/count_adv_'+self.args.name+'.pt')
+            torch.save(self.watermarking_loss_before_embedding, '../stats/wm/watermarking_loss_before_embedding_'+self.args.name+'.pt')
+            torch.save(self.watermarking_acc_before_embedding, '../stats/wm/watermarking_acc_before_embedding_'+self.args.name+'.pt')
+            torch.save(self.watermarking_loss_after_embedding, '../stats/wm/watermarking_loss_after_embedding_'+self.args.name+'.pt')
+            torch.save(self.watermarking_acc_after_embedding, '../stats/wm/watermarking_acc_after_embedding_'+self.args.name+'.pt')
+
+            torch.save(self.model_global.state_dict(), '../stats/models/waffle_'+self.args.name+'.pt')
+            torch.save(self.count_adv, '../stats/count/count_adv_'+self.args.name+'.pt')
+
+    #----Evaluation----
+    def evaluate(self):
+        rl,ra = self.test() # Performing evaluation on main task test data for normal FL.
+        self.test_loss_normal.append(rl) 
+        self.test_acc_normal.append(ra)
+        print('Normal main task stats')
+        print(f'server stats: [test-loss: {rl:.3f}')
+        print(f'server stats: [test-accuracy: {ra:.3f}')
+        print()
+
+
+    #----Evaluation and retraining for waffle----
+    def evaluate_waffle(self):
+        rl,ra = self.test() # Performing evaluation on main task test data before retraining.
+        self.test_loss_before_embedding.append(rl) 
+        self.test_acc_before_embedding.append(ra)
+
+        print('Before watermarking, main task')
+        print(f'server stats: [test-loss: {rl:.3f}')
+        print(f'server stats: [test-accuracy: {ra:.3f}')
+        print()
+
+        # Retrain the global model using the watermarks
+        if not self.retrainingR == 0:
+            self.retrain()
+        rl,ra = self.test() # Performing evaluation on main task test data after retraining.
+        self.test_loss_after_embedding.append(rl)
+        self.test_acc_after_embedding.append(ra)
+
+        print('After watermarking, main task')
+        print(f'server stats: [test-loss: {rl:.3f}')
+        print(f'server stats: [test-accuracy: {ra:.3f}')
+        print()
         
     #----Performing evaluation on main task test data----
     def test(self):
@@ -222,7 +248,7 @@ class Server():
         rl,ra = self.watermark_test()
         running_loss = rl
         running_acc = ra
-        print("Watermarking Accuracy before watermarking")
+        print("Watermarking stats before watermarking")
         print(f'server stats: [watermarking-loss: {running_loss:.3f}')
         print(f'server stats: [watermarking-accuracy: {running_acc:.3f}')
         self.watermarking_loss_before_embedding.append(running_loss)
@@ -253,7 +279,7 @@ class Server():
             running_loss = running_loss/(index+1)
         
         # Performing evaluation on watermarking data after retraining.
-        print('Watermarking Accuracy after watermarking.')
+        print('Watermarking stats after watermarking.')
         print(f'server stats: [watermarking-loss: {running_loss:.3f}')
         print(f'server stats: [watermarking-accuracy: {running_acc:.3f}')
         self.watermarking_loss_after_embedding.append(running_loss)
